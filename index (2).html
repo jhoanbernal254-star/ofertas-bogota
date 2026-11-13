@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Ofertas Bogotá</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800;900&family=Hanken+Grotesk:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<!--BODY-->
+<div class="wrap">
+  <header class="bar">
+    <a class="brand" href="#inicio" id="brandLink">Ofertas Bogotá</a>
+  </header>
+
+  <section class="house" id="houseBox" aria-labelledby="h-inicio">
+    <h1 id="h-inicio" class="sr-only">Ofertas Bogotá: ofertas, promociones y negocios de toda la ciudad</h1>
+    <a class="house-link" href="#anunciar" aria-label="Anuncia tu negocio en Ofertas Bogotá">
+      <img src="bienvenida.jpg" width="1600" height="624" alt="Ofertas Bogotá: tu directorio comercial y publicidad en un solo lugar. Publica tu negocio, llega a más clientes y aumenta tu visibilidad. Publica ahora." fetchpriority="high">
+    </a>
+  </section>
+
+  <div id="plusBox" class="plus-box" hidden></div>
+
+  <main id="main">
+    <!-- Inicio: directorio -->
+    <section class="view" id="v-inicio" aria-labelledby="h-inicio">
+      <form class="filters-row" id="filters" role="search" aria-label="Buscar anuncios">
+        <div class="searchbox">
+          <input id="fl-q" type="search" placeholder="Buscar" aria-label="Buscar por nombre, producto o servicio" autocomplete="off">
+          <span class="lupa" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></span>
+        </div>
+        <button class="btn ghost sm" type="button" id="filterToggle" aria-expanded="false" aria-controls="filterPanel">Filtros</button>
+        <p class="count" id="totalCount"></p>
+        <div class="filter-panel" id="filterPanel" hidden>
+          <div class="fld">
+            <label for="fl-loc">Localidad</label>
+            <select id="fl-loc"></select>
+          </div>
+          <div class="fld">
+            <label for="fl-barrio">Barrio o sector</label>
+            <input id="fl-barrio" type="text" placeholder="Ej. Niza" autocomplete="off">
+          </div>
+          <div class="fld">
+            <label for="fl-cat">Tipo de comercio</label>
+            <select id="fl-cat"></select>
+          </div>
+          <div class="fld">
+            <label for="fl-tipo">Tipo de anuncio</label>
+            <select id="fl-tipo"></select>
+          </div>
+          <button class="btn ghost sm" type="button" id="clearFilters">Limpiar</button>
+        </div>
+      </form>
+      <p class="note" id="dataNote" hidden></p>
+      <p class="count" id="resultCount" aria-live="polite"></p>
+
+      <div id="bannerBox" class="banner-box" hidden></div>
+      <div id="secDest" hidden>
+        <p class="sub">Destacados</p>
+        <div class="wall" id="gridDest"></div>
+      </div>
+      <div id="secStd" hidden>
+        <p class="sub">Más anuncios</p>
+        <div class="wall" id="gridStd"></div>
+      </div>
+      <div class="card" id="emptyBox" hidden></div>
+    </section>
+
+    <!-- Ficha -->
+    <section class="view" id="v-ficha" hidden aria-label="Ficha del anuncio">
+      <p><a href="#inicio" id="backLink">← Volver a los anuncios</a></p>
+      <div id="fichaBody"></div>
+    </section>
+
+    <!-- Anunciar -->
+    <section class="view" id="v-anunciar" aria-labelledby="h-anunciar" hidden>
+      <div class="sec-head">
+        <h2 id="h-anunciar">Anuncia tu negocio</h2>
+        <p>Tú eliges cuánto dura: de 1 día a 1 mes. Renovable.</p>
+      </div>
+      <ol class="steps">
+        <li>Elige el tipo de espacio</li>
+        <li>Cuéntanos de tu negocio</li>
+        <li>Envía tu imagen o pide que te la diseñemos</li>
+        <li>Revisamos y publicamos</li>
+      </ol>
+      <div class="book">
+        <form class="f" id="form" autocomplete="off" novalidate>
+          <div class="fld">
+            <span class="lbl" id="l-plan">Qué quieres contratar</span>
+            <div class="plans" id="plans" role="group" aria-labelledby="l-plan"></div>
+          </div>
+          <div class="fld" id="durBox">
+            <span class="lbl" id="l-dur">Cuánto tiempo</span>
+            <div class="chips" id="durs" role="group" aria-labelledby="l-dur"></div>
+            <p class="fine">Máximo 1 mes por pedido. Cuando termine, puedes renovarlo.</p>
+          </div>
+
+          <p class="sub">Tu negocio</p>
+          <div class="fld">
+            <label for="f-brand">Nombre del negocio <span class="cnt" id="c-brand">0/30</span></label>
+            <input id="f-brand" type="text" maxlength="30">
+          </div>
+          <div id="grpListing" class="f">
+            <div class="two">
+              <div class="fld"><label for="f-cat">Tipo de comercio</label><select id="f-cat"></select></div>
+              <div class="fld"><label for="f-loc">Localidad</label><select id="f-loc"></select></div>
+            </div>
+            <div class="two">
+              <div class="fld"><label for="f-barrio">Barrio o sector <span class="cnt" id="c-barrio">0/60</span></label><input id="f-barrio" type="text" maxlength="60" placeholder="Ej. Niza"></div>
+              <div class="fld"><label for="f-addr">Dirección <span class="cnt" id="c-addr">0/100</span></label><input id="f-addr" type="text" maxlength="100" placeholder="Opcional"></div>
+            </div>
+          </div>
+          <p class="sub">Contacto (pon al menos uno)</p>
+          <div class="two">
+            <div class="fld"><label for="f-wa">WhatsApp</label><input id="f-wa" type="text" inputmode="tel" placeholder="300 000 0000"></div>
+            <div class="fld"><label for="f-phone">Teléfono</label><input id="f-phone" type="text" inputmode="tel" placeholder="Opcional"></div>
+          </div>
+          <div class="two">
+            <div class="fld"><label for="f-email">Correo</label><input id="f-email" type="email" inputmode="email" placeholder="Opcional"></div>
+            <div class="fld"><label for="f-web">Sitio web o red social</label><input id="f-web" type="text" inputmode="url" placeholder="https://"></div>
+          </div>
+          <p class="fine">Estos datos se publican tal cual en la ficha de tu negocio. Escribe solo lo que quieras que vea todo el mundo.</p>
+
+          <div id="grpAd" class="f">
+            <p class="sub">Tu anuncio</p>
+            <div class="fld">
+              <label for="f-head">Titular <span class="cnt" id="c-head">0/48</span></label>
+              <input id="f-head" type="text" maxlength="48" placeholder="Lo primero que se lee">
+            </div>
+            <div class="fld">
+              <label for="f-body">Descripción <span class="cnt" id="c-body">0/300</span></label>
+              <textarea id="f-body" maxlength="300" placeholder="Qué ofreces, horarios, promociones"></textarea>
+            </div>
+            <div class="fld">
+              <span class="lbl" id="l-pal">Color de fondo</span>
+              <div class="pals" id="pals" role="group" aria-labelledby="l-pal"></div>
+              <p class="fine">Se usa cuando no subes imagen.</p>
+            </div>
+          </div>
+
+          <div class="fld">
+            <label for="f-file" id="l-file">Imagen</label>
+            <div class="drop">
+              <input id="f-file" type="file" accept="image/*">
+              <div class="picked" id="picked" hidden>
+                <span id="pickedName"></span>
+                <button class="btn sm ghost" type="button" id="clearFile">Quitar</button>
+              </div>
+              <p class="fine" id="fileHint"></p>
+              <p class="fine warn" id="sizeWarn" hidden></p>
+            </div>
+          </div>
+
+          <div class="card" id="designBox">
+            <label class="check"><input type="checkbox" id="x-design"> <span>Quiero que lo diseñen por mí <b id="designPriceTxt"></b> por pieza</span></label>
+            <div id="designMore" class="f" hidden>
+              <div class="fld">
+                <span class="lbl" id="l-pieces">Cuántas piezas</span>
+                <div class="chips" id="pieces" role="group" aria-labelledby="l-pieces"></div>
+              </div>
+              <div class="fld">
+                <label for="f-brief">Cuéntanos qué necesitas <span class="cnt" id="c-brief">0/400</span></label>
+                <textarea id="f-brief" maxlength="400" placeholder="Colores, estilo, textos que deben aparecer. Si tienes logo o fotos, súbelos arriba como referencia."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <label class="check" id="promoBox" hidden><input type="checkbox" id="x-promo"> <span><b>Usar mi espacio gratis de lanzamiento.</b> El espacio no se cobra. Una vez por cuenta, mientras haya cupos y <b>solo hasta el <span id="promoUntil"></span></b>.</span></label>
+
+          <label class="check"><input type="checkbox" id="x-terms"> <span>Acepto los <a href="#terminos">términos y condiciones</a> y la <a href="#privacidad">política de privacidad</a>. <span id="termsText"></span></span></label>
+
+          <div><button class="btn" type="submit" id="payBtn">Enviar solicitud</button></div>
+          <p class="fine">No pagas nada ahora. Revisamos tu solicitud y, si la aceptamos, te mostramos cómo pagar. Si no la aceptamos, no se cobra nada.</p>
+          <div class="bar-prog" id="prog" hidden><span id="progFill"></span></div>
+          <p class="msg" id="msg" role="status" aria-live="polite"></p>
+        </form>
+
+        <div class="pvcol">
+          <div id="pvWrap">
+            <p class="sub">Así se verá</p>
+            <div class="pvbox" id="preview" data-tier="destacado"></div>
+          </div>
+          <div class="sum" id="sum"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Entrar -->
+    <section class="view" id="v-entrar" aria-labelledby="h-auth" hidden>
+      <div class="sec-head"><h2 id="h-auth">Entrar</h2></div>
+      <form class="card authbox f" id="authForm" novalidate>
+        <div class="fld" id="nameFld" hidden>
+          <label for="au-name">Tu nombre</label>
+          <input id="au-name" type="text" maxlength="60" autocomplete="name">
+        </div>
+        <div class="fld">
+          <label for="au-email">Correo</label>
+          <input id="au-email" type="email" autocomplete="email" inputmode="email">
+        </div>
+        <div class="fld">
+          <label for="au-pass">Contraseña</label>
+          <input id="au-pass" type="password" autocomplete="current-password" minlength="6">
+        </div>
+        <button class="btn" type="submit" id="authSubmit">Entrar</button>
+        <div class="acts">
+          <button class="btn sm ghost" type="button" id="authToggle">Crear una cuenta</button>
+          <button class="btn sm ghost" type="button" id="authReset">Olvidé mi contraseña</button>
+        </div>
+        <p class="msg" id="authMsg" role="status" aria-live="polite"></p>
+        <div id="demoLogins" hidden>
+          <p class="sub">Cuentas de prueba</p>
+          <div class="acts">
+            <button class="btn sm ghost" type="button" id="loginAdmin">Entrar como administrador</button>
+            <button class="btn sm ghost" type="button" id="loginAdv">Entrar como anunciante</button>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- Mi cuenta -->
+    <section class="view" id="v-cuenta" aria-labelledby="h-cta" hidden>
+      <div class="sec-head">
+        <h2 id="h-cta">Mi cuenta</h2>
+        <p><a href="#anunciar">Contratar otro espacio</a></p>
+      </div>
+      <p class="sub">Mis anuncios</p>
+      <div class="list" id="myAds"></div>
+      <p class="sub" style="margin-top:28px">Mis pedidos</p>
+      <div class="list" id="myList"></div>
+      <p class="sub" id="noticeHead" style="margin-top:28px">Avisos</p>
+      <p class="fine" id="noticeNote"></p>
+      <div class="list" id="myNotices"></div>
+      <p class="msg" id="myMsg" role="status" aria-live="polite"></p>
+    </section>
+
+    <!-- Legal -->
+    <section class="view" id="v-legal" aria-labelledby="h-legal" hidden>
+      <p><a href="#inicio" id="legalBack">← Volver</a></p>
+      <article class="legal" id="legalBody"></article>
+    </section>
+
+    <!-- Pago -->
+    <section class="view" id="v-pago" aria-labelledby="h-pago" hidden>
+      <div class="sec-head"><h2 id="h-pago">Estado de tu pedido</h2></div>
+      <div class="card" id="payCard"></div>
+    </section>
+
+    <!-- Administrar -->
+    <section class="view" id="v-admin" aria-labelledby="h-admin" hidden>
+      <div class="sec-head">
+        <h2 id="h-admin">Administrar</h2>
+        <p>Solo lo ven los administradores.</p>
+      </div>
+      <p class="note bad" id="adminDenied" hidden>Tu cuenta no tiene permisos de administrador.</p>
+      <div class="admin-cols" id="adminBody">
+        <div class="stats" id="stats"></div>
+        <p class="msg" id="admMsg" role="status" aria-live="polite"></p>
+        <div>
+          <p class="sub">Solicitudes por revisar</p>
+          <div class="list" id="reviewList"></div>
+        </div>
+        <div>
+          <p class="sub">Esperando pago</p>
+          <div class="list" id="payList"></div>
+        </div>
+        <div>
+          <div class="crow">
+            <p class="sub">Anuncios</p>
+            <button class="btn sm" type="button" id="newAd">Crear anuncio</button>
+          </div>
+          <div class="filters" id="adFilters" role="group" aria-label="Filtrar anuncios"></div>
+          <div class="list" id="adList"></div>
+        </div>
+        <div>
+          <p class="sub">Todos los pedidos</p>
+          <div class="filters" id="orderFilters" role="group" aria-label="Filtrar pedidos"></div>
+          <div class="list" id="orderList"></div>
+        </div>
+        <div>
+          <p class="sub">Precios, cupos y promoción</p>
+          <div class="card">
+            <div class="grid4">
+              <div class="fld"><label for="a-banner">Banner</label><input id="a-banner" type="number" min="1500" step="500" inputmode="numeric"></div>
+              <div class="fld"><label for="a-destacado">Destacado</label><input id="a-destacado" type="number" min="1500" step="500" inputmode="numeric"></div>
+              <div class="fld"><label for="a-mediano">Mediano</label><input id="a-mediano" type="number" min="1500" step="500" inputmode="numeric"></div>
+              <div class="fld"><label for="a-pequeno">Pequeño</label><input id="a-pequeno" type="number" min="1500" step="500" inputmode="numeric"></div>
+            </div>
+            <div class="grid4">
+              <div class="fld"><label for="a-design">Diseño por pieza</label><input id="a-design" type="number" min="1500" step="500" inputmode="numeric"></div>
+              <div class="fld"><label for="a-capb">Cupos banner</label><input id="a-capb" type="number" min="1" max="50" inputmode="numeric"></div>
+              <div class="fld"><label for="a-capd">Cupos destacado</label><input id="a-capd" type="number" min="1" max="200" inputmode="numeric"></div>
+              <div class="fld"><label for="a-plimit">Cupos del mes gratis</label><input id="a-plimit" type="number" min="0" max="1000" inputmode="numeric"></div>
+            </div>
+            <div class="grid4">
+              <div class="fld"><label for="a-puntil">La promo cierra el</label><input id="a-puntil" type="date"></div>
+            </div>
+            <div class="grid4">
+              <div class="fld"><label for="a-premium">Banner Plus</label><input id="a-premium" type="number" min="1500" step="500" inputmode="numeric"></div>
+              <div class="fld"><label for="a-capp">Cupos Plus</label><input id="a-capp" type="number" min="1" max="10" inputmode="numeric"></div>
+            </div>
+            <label class="check"><input type="checkbox" id="a-penabled"> <span>Promoción de lanzamiento activa (un espacio gratis por cuenta)</span></label>
+            <div class="acts"><button class="btn sm" type="button" id="saveCfg">Guardar</button></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="foot">
+    <nav class="nav" aria-label="Secciones">
+      <a href="#inicio" data-view="inicio">Anuncios</a>
+      <a href="#anunciar" data-view="anunciar">Anunciar</a>
+      <a href="#cuenta" data-view="cuenta" id="navCuenta" hidden>Mi cuenta</a>
+      <a href="#admin" data-view="admin" id="navAdmin" hidden>Administrar</a>
+    </nav>
+    <div class="who" id="who"></div>
+    <div class="demo" id="demoBanner" hidden>
+      <strong>Modo demostración</strong>
+      <p>Todo es de prueba y vive solo en este navegador (en otro celular o computador no se ve lo mismo). No se cobra dinero. Entra con las cuentas de prueba para ver el lado del anunciante y el del administrador.</p>
+      <button class="btn sm ghost" type="button" id="seedBtn">Cargar anuncios de ejemplo</button>
+      <button class="btn sm ghost" type="button" id="resetBtn">Borrar datos de prueba</button>
+    </div>
+    <p class="legal-links"><a href="#terminos">Términos y condiciones</a> · <a href="#privacidad">Política de privacidad</a></p>
+    <p id="footText"></p>
+  </footer>
+</div>
+
+
+<dialog id="dlgEdit" aria-label="Editar anuncio">
+  <form class="dlg f" id="editForm" novalidate>
+    <h2 id="edTitle">Anuncio</h2>
+    <div class="two">
+      <div class="fld"><label for="ed-brand">Negocio</label><input id="ed-brand" type="text" maxlength="30"></div>
+      <div class="fld"><label for="ed-head">Titular</label><input id="ed-head" type="text" maxlength="48"></div>
+    </div>
+    <div class="fld"><label for="ed-body">Descripción</label><textarea id="ed-body" maxlength="300"></textarea></div>
+    <div class="two">
+      <div class="fld"><label for="ed-cat">Tipo de comercio</label><select id="ed-cat"></select></div>
+      <div class="fld"><label for="ed-loc">Localidad</label><select id="ed-loc"></select></div>
+    </div>
+    <div class="two">
+      <div class="fld"><label for="ed-barrio">Barrio o sector</label><input id="ed-barrio" type="text" maxlength="60"></div>
+      <div class="fld"><label for="ed-addr">Dirección</label><input id="ed-addr" type="text" maxlength="100"></div>
+    </div>
+    <div class="two">
+      <div class="fld"><label for="ed-wa">WhatsApp</label><input id="ed-wa" type="text" inputmode="tel"></div>
+      <div class="fld"><label for="ed-phone">Teléfono</label><input id="ed-phone" type="text" inputmode="tel"></div>
+    </div>
+    <div class="two">
+      <div class="fld"><label for="ed-email">Correo</label><input id="ed-email" type="email"></div>
+      <div class="fld"><label for="ed-web">Sitio web o red social</label><input id="ed-web" type="text" inputmode="url"></div>
+    </div>
+    <div class="two">
+      <div class="fld"><label for="ed-tier">Tipo de espacio</label><select id="ed-tier"></select></div>
+      <div class="fld"><label for="ed-pal">Color de fondo</label><select id="ed-pal"></select></div>
+    </div>
+    <div class="two">
+      <div class="fld"><label for="ed-ends">Vence el</label><input id="ed-ends" type="date"></div>
+      <div class="fld"><label for="ed-file">Imagen (reemplaza la actual)</label><input id="ed-file" type="file" accept="image/*"></div>
+    </div>
+    <label class="check"><input type="checkbox" id="ed-active"> <span>Publicado y visible para todos</span></label>
+    <div class="bar-prog" id="edProg" hidden><span id="edProgFill"></span></div>
+    <p class="msg" id="edMsg" role="status" aria-live="polite"></p>
+    <div class="acts">
+      <button class="btn" type="submit" id="edSave">Guardar</button>
+      <button class="btn ghost" type="button" id="edCancel">Cancelar</button>
+    </div>
+  </form>
+</dialog>
+<!--/BODY-->
+
+<script src="config.js"></script>
+<script src="backend-demo.js"></script>
+<script src="backend-firebase.js"></script>
+<script src="legal.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
