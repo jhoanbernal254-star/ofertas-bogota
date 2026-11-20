@@ -86,7 +86,7 @@
   function route() {
     var p = parseHash(), v = p.view;
     if (!owns(v)) { location.replace(new URL(ownerPath(v), ROOT).href + location.hash); return false; }
-    if (['cuenta', 'pago', 'admin', 'contrato', 'informe', 'anunciar'].indexOf(v) >= 0 && !state.user && state.authReady) {
+    if (['cuenta', 'pago', 'admin', 'contrato', 'informe'].indexOf(v) >= 0 && !state.user && state.authReady) {
       state.afterLogin = '#' + v; v = 'entrar';
       if (location.hash !== '#entrar') location.hash = '#entrar';
     }

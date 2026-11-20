@@ -680,3 +680,9 @@ dialog::backdrop { background: rgba(8, 14, 42, 0.6); }
 @keyframes popIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
 @media(max-width:700px){.pop-ov{align-items:flex-end;padding:0}.pop-box{border-radius:20px 20px 0 0;max-height:92vh}}
 @media(prefers-reduced-motion:reduce){.pop-box{animation:none}}
+
+/* ---- Cuenta dentro del formulario ---- */
+.how-acct{margin:0 0 1rem}
+.how-mini{margin:.4rem 0 .5rem;padding-left:1.2rem;display:grid;gap:.15rem;font-size:.92rem}
+.acct{border:1.5px solid #dfe3ee;border-radius:14px;padding:1rem;margin:1rem 0;background:#fff;display:grid;gap:.6rem}
+.acct .h3{margin:0}

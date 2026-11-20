@@ -45,7 +45,7 @@ window.PB_CONFIG = {
     { days: 30, label: '1 mes', disc: 0.2 }
   ],
 
-  terms: 'Primero envías tu solicitud y no pagas nada. Si la aceptamos, te mostramos cómo pagar y tu anuncio se publica cuando confirmamos el pago. Si no la aceptamos, no se cobra nada. Eliges cuánto dura (de 1 día a 1 mes) y puedes renovarla.',
+  terms: 'Primero envías tu solicitud y no pagas nada. Si la aceptamos, tu anuncio se publica; si hay algo que pagar (por ejemplo el diseño), te enviamos la llave de pago por WhatsApp y se publica cuando confirmamos el pago. Durante el lanzamiento el espacio publicitario es gratis. Si no la aceptamos, no se cobra nada. Eliges cuánto dura (de 1 día a 1 mes) y puedes renovarla.',
 
   // Tipos de espacio. "group" es el filtro "Tipo de anuncio": banner, destacado o estándar.
   // "cap" es el máximo de anuncios activos al mismo tiempo (vacío = sin límite).

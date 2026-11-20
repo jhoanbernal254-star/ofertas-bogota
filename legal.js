@@ -22,7 +22,7 @@ window.PB_LEGAL = {
           'Los cupos de Banner Plus, Banner principal y Anuncio destacado son limitados. Un cupo se reserva cuando se paga el pedido.'
         ] },
         { t: '5. Pagos', p: [
-          'Primero envías una solicitud y no pagas nada. Si la aceptamos, te indicamos el valor y cómo pagar (transferencia por Nequi). El pedido se considera pagado y tu anuncio se publica cuando confirmamos el pago. Si no aceptamos tu solicitud, no se te cobra nada.'
+          'Primero envías una solicitud y no pagas nada. Si la aceptamos, te indicamos el valor y cómo pagar (llave de pago enviada por WhatsApp). El pedido se considera pagado y tu anuncio se publica cuando confirmamos el pago. Si no aceptamos tu solicitud, no se te cobra nada.'
         ] },
         { t: '6. Revisión y aprobación', p: [
           'Todo anuncio pasa por una revisión antes de publicarse. Podemos rechazar o retirar anuncios que incumplan estos términos. Si no aceptamos tu solicitud, no se te cobra nada.',

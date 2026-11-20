@@ -4,7 +4,7 @@
   var PB = window.PB, C = PB.C, $ = PB.$, el = PB.el, state = PB.state;
   var TIERS = ['pequeno', 'mediano', 'destacado', 'banner', 'premium'];
 
-  var W = PB.wiz = { step: 1, tier: 'destacado', days: 30, need: false, pieces: 1, promo: false, pal: 0, cats: [], file: null, fileURL: null, fileDims: null, file2: null, busy: false };
+  var W = PB.wiz = { step: 1, tier: 'destacado', days: 30, need: false, pieces: 1, promo: false, pal: 0, cats: [], file: null, fileURL: null, fileDims: null, file2: null, busy: false, acct: 'up', pending: false };
   function designOnly() { return W.tier === ''; }
   function wantsDesign() { return W.need || designOnly(); }
   function effFile() { return wantsDesign() ? W.file2 : W.file; }
@@ -80,7 +80,7 @@
     PB.setMsg($('msg'), '', '');
     return true;
   }
-  function goStep(n) { W.step = n; renderSteps(); PB.renderWizard(); window.scrollTo(0, 0); }
+  function goStep(n) { W.step = n; saveDraft(); renderSteps(); PB.renderWizard(); window.scrollTo(0, 0); }
 
   // ---------- Dibujo ----------
   function renderCats() {
@@ -178,6 +178,7 @@
 
   PB.renderWizard = function () {
     var c = PB.cfg();
+    renderAcct();
     $('verifyBox').hidden = verified(); $('verifyMail').textContent = state.user ? state.user.email : '';
     if (W.tier && PB.capLeft(W.tier) === 0) {
       var ok = TIERS.filter(function (t) { return PB.capLeft(t) > 0; })[0];
@@ -251,12 +252,23 @@
   async function submit() {
     if (W.busy) return;
     for (var s = 1; s <= 5; s++) if (!validate(s)) return;
-    if (!verified()) { PB.setMsg($('msg'), 'Verifica tu correo para enviar la solicitud (revisa el aviso de arriba).', 'err'); window.scrollTo(0, 0); return; }
     if (!state.user) {
-      state.afterLogin = '#anunciar';
-      PB.setMsg($('authMsg'), 'Entra o crea tu cuenta para enviar. Lo que escribiste se queda como está.', '');
-      location.hash = '#entrar';
-      return;
+      var am = $('msg'), mail = PB.normMail($('ac-mail').value), pass = $('ac-pass').value;
+      if (!mail) { PB.setMsg(am, 'Escribe un correo válido para tu cuenta.', 'err'); $('ac-mail').focus(); return; }
+      if (W.acct === 'up' && (pass.length < 8 || !/\d/.test(pass) || !/[A-Za-z]/.test(pass))) { PB.setMsg(am, 'La contraseña debe tener mínimo 8 caracteres, con letras y números.', 'err'); $('ac-pass').focus(); return; }
+      if (!pass) { PB.setMsg(am, 'Escribe tu contraseña.', 'err'); $('ac-pass').focus(); return; }
+      W.busy = true; $('payBtn').disabled = true;
+      PB.setMsg(am, W.acct === 'up' ? 'Creando tu cuenta…' : 'Entrando…', '');
+      try {
+        if (W.acct === 'up') await PB.B.signUp(vals().legal, mail, pass); else await PB.B.signIn(mail, pass);
+        for (var i = 0; i < 40 && !state.user; i++) await new Promise(function (r) { setTimeout(r, 100); });
+      } catch (err) { PB.setMsg(am, PB.errText(err), 'err'); W.busy = false; $('payBtn').disabled = false; return; }
+      W.busy = false; $('payBtn').disabled = false;
+    }
+    if (!verified()) {
+      W.pending = true; saveDraft(); PB.renderWizard();
+      PB.setMsg($('msg'), 'Cuenta lista. Te enviamos un correo para verificarla: ábrelo, toca el enlace y luego presiona "Ya verifiqué mi correo" aquí arriba. Tu solicitud se envía sola.', 'ok');
+      window.scrollTo(0, 0); return;
     }
     var v = vals(), only = designOnly(), design = wantsDesign(), t = totals(), file = effFile(), msg = $('msg');
     W.busy = true; $('payBtn').disabled = true;
@@ -274,11 +286,44 @@
         pal: W.pal, file: file
       }, function (p) { $('progFill').style.width = p + '%'; });
       PB.setMsg(msg, '', '');
+      clearDraft(); W.pending = false;
       state.payOrder = res.orderId;
       resetAll();
       location.hash = '#pago';
     } catch (err) { PB.setMsg(msg, PB.errText(err), 'err'); }
     W.busy = false; $('payBtn').disabled = false; $('prog').hidden = true;
+  }
+
+  // ---------- Borrador (se guarda en este navegador; no incluye cédula/NIT ni la imagen) ----------
+  var DRAFT = 'pb-draft-v1', DF = ['f-brand', 'f-head', 'f-body', 'f-offer', 'f-hours', 'f-loc', 'f-barrio', 'f-addr', 'f-legal', 'f-wa', 'f-phone', 'f-email', 'f-web', 'f-brief'], dTimer = null;
+  function saveDraft() {
+    try {
+      var d = { t: Date.now(), f: {}, tier: W.tier, days: W.days, need: W.need, pieces: W.pieces, pal: W.pal, cats: W.cats, step: Math.min(W.step, 5) };
+      DF.forEach(function (id) { d.f[id] = $(id).value; });
+      localStorage.setItem(DRAFT, JSON.stringify(d));
+    } catch (e) {}
+  }
+  function clearDraft() { try { localStorage.removeItem(DRAFT); } catch (e) {} }
+  function restoreDraft() {
+    try {
+      var d = JSON.parse(localStorage.getItem(DRAFT) || 'null');
+      if (!d || Date.now() - d.t > 7 * 86400000) { clearDraft(); return; }
+      DF.forEach(function (id) { if (d.f[id] != null && $(id)) { $(id).value = d.f[id]; $(id).dispatchEvent(new Event('input')); } });
+      if (d.tier !== undefined) W.tier = d.tier;
+      if (d.days) W.days = d.days;
+      W.need = !!d.need; if (d.pieces) W.pieces = d.pieces; if (d.pal >= 0) W.pal = d.pal;
+      W.cats = Array.isArray(d.cats) ? d.cats.slice(0, C.maxCats || 3) : [];
+      if (d.step >= 1 && d.step <= 5) W.step = d.step;
+    } catch (e) {}
+  }
+  function schedDraft() { clearTimeout(dTimer); dTimer = setTimeout(saveDraft, 400); }
+  function renderAcct() {
+    var out = !state.user;
+    $('acctBox').hidden = !out; $('acctIntro').hidden = !out;
+    $('acMode-up').setAttribute('aria-pressed', W.acct === 'up' ? 'true' : 'false');
+    $('acMode-in').setAttribute('aria-pressed', W.acct === 'in' ? 'true' : 'false');
+    $('acHint').hidden = W.acct !== 'up';
+    $('ac-pass').setAttribute('autocomplete', W.acct === 'up' ? 'new-password' : 'current-password');
   }
 
   // ---------- Conexión ----------
@@ -288,10 +333,20 @@
       try { await PB.B.resendVerification(); PB.setMsg($('verifyMsg'), 'Te enviamos el correo de nuevo.', 'ok'); } catch (e) { PB.setMsg($('verifyMsg'), PB.errText(e), 'err'); }
     });
     $('verifyDone').addEventListener('click', async function () {
-      try { await PB.B.refreshUser(); PB.setMsg($('verifyMsg'), verified() ? '¡Correo verificado!' : 'Todavía no aparece verificado. Abre el enlace del correo y vuelve a intentar.', verified() ? 'ok' : 'err'); } catch (e) { PB.setMsg($('verifyMsg'), PB.errText(e), 'err'); }
+      try {
+        await PB.B.refreshUser();
+        if (!verified()) { PB.setMsg($('verifyMsg'), 'Todavía no aparece verificado. Abre el enlace del correo y vuelve a intentar.', 'err'); return; }
+        PB.setMsg($('verifyMsg'), '¡Correo verificado!', 'ok');
+        if (W.pending) { W.pending = false; submit(); } else PB.setMsg($('msg'), 'Listo. Ya puedes enviar tu solicitud.', 'ok');
+      } catch (e) { PB.setMsg($('verifyMsg'), PB.errText(e), 'err'); }
     });
-    var pk = PB.takePick(); if (pk) { if (pk.tier !== undefined && pk.tier !== null) W.tier = pk.tier; if (pk.days) W.days = pk.days; if (pk.need) W.need = true; }
     PB.fillLocs($('f-loc'), 'Elige…');
+    restoreDraft();
+    $('form').addEventListener('input', schedDraft);
+    $('form').addEventListener('change', schedDraft);
+    $('acMode-up').addEventListener('click', function () { W.acct = 'up'; renderAcct(); });
+    $('acMode-in').addEventListener('click', function () { W.acct = 'in'; renderAcct(); });
+    var pk = PB.takePick(); if (pk) { if (pk.tier !== undefined && pk.tier !== null) W.tier = pk.tier; if (pk.days) W.days = pk.days; if (pk.need) W.need = true; }
     var pl = $('pals');
     C.palettes.forEach(function (p, i) {
       var b = el('button', 'sw'); b.type = 'button'; b.style.background = p.bg; b.title = p.n;
