@@ -9,6 +9,7 @@
   Los valores de aquí son los iniciales; lo que guardes desde el panel de administración tiene prioridad.
 */
 window.PB_CONFIG = {
+  version: '2026.11.20-d',
   mode: 'firebase', // 'demo' | 'firebase'
   brand: 'Ofertas Bogotá', // nombre provisional, cámbialo cuando lo definas
   functionsRegion: 'us-central1',

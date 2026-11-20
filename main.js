@@ -41,7 +41,7 @@
     $('navAdmin').hidden = true; $('adminSep').hidden = true;
     var demo = B.mode === 'demo';
     $('demoBar').hidden = !demo; $('demoBanner').hidden = !demo; $('demoLogins').hidden = !demo;
-    $('footText').textContent = C.brand + ' · ' + (demo ? 'Demostración, sin cobros reales' : 'Bogotá y la Sabana');
+    $('footText').textContent = C.brand + ' · ' + (demo ? 'Demostración, sin cobros reales' : 'Bogotá y la Sabana') + ' · v' + (C.version || '?');
     var lb = $('launchBar'), lon = PB.launchOn() && ENTRY !== 'admin';
     lb.hidden = !lon; if (lon) $('launchText').textContent = 'Lanzamiento: publica tu negocio gratis hasta el ' + C.launchUntilLabel(state.config) + '.';
     $('brandLink').setAttribute('href', ENTRY === 'admin' ? '#admin' : '#inicio');
@@ -122,10 +122,14 @@
   }
 
   function renderAll() {
-    renderChrome();
-    if (route() === false) return;
+    try { renderChrome(); } catch (e) { console.error('[PB] chrome', e); }
+    var routed; try { routed = route(); } catch (e) { console.error('[PB] ruta', e); routed = true; }
+    if (routed === false) return;
     var v = state.view;
     // Solo se dibuja la pantalla visible (más las que alimentan al resto).
+    try { renderView(v); } catch (e) { console.error('[PB] pantalla ' + v, e); }
+  }
+  function renderView(v) {
     if (v === 'inicio') PB.renderHome();
     else if (v === 'directorio') PB.renderDirectorio();
     else if (v === 'ofertas') PB.renderOfertas();
@@ -154,7 +158,7 @@
 
   async function init() {
     PB.hydrate(document);
-    ['initPages', 'initPopup', 'initExtras', 'initPublish', 'initAccount', 'initContract', 'initReports', 'initAdmin'].forEach(function (f) { if (PB[f]) PB[f](); });
+    ['initPages', 'initPopup', 'initExtras', 'initPublish', 'initAccount', 'initContract', 'initReports', 'initAdmin'].forEach(function (f) { try { if (PB[f]) PB[f](); } catch (e) { console.error('[PB] ' + f, e); } });
     renderFooter();
     document.title = C.brand;
     $('logoutBtn').addEventListener('click', doLogout);

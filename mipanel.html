@@ -217,13 +217,23 @@
     <div class="in wiz-wrap">
       <p class="eyebrow">Para comerciantes</p>
       <h1 class="h1 dark" id="h-anunciar">Publica tu negocio en Ofertas Bogotá</h1>
+      <div class="note how-acct" id="acctIntro" hidden>
+        <b>Así funciona:</b>
+        <ol class="how-mini">
+          <li>Llenas los datos de tu negocio (5 pasos cortos).</li>
+          <li>Al final creas tu cuenta gratis con tu correo y una contraseña.</li>
+          <li>Verificas tu correo con un enlace que te enviamos.</li>
+          <li>Revisamos tu solicitud y la publicamos.</li>
+        </ol>
+        <span class="fine">Con tu cuenta podrás ver en qué va tu solicitud, descargar tu contrato, ver tus visitas y clics, y renovar cuando quieras.</span>
+      </div>
       <div class="note" id="verifyBox" hidden>
         <b>Verifica tu correo para enviar tu solicitud.</b>
         <p class="fine">Te enviamos un enlace a <span id="verifyMail"></span>. Revisa también la carpeta de spam.</p>
         <div class="acts"><button class="btn sm navy" type="button" id="verifyDone">Ya verifiqué mi correo</button><button class="btn sm ghost" type="button" id="verifyResend">Reenviar correo</button></div>
         <p class="msg" id="verifyMsg" role="status" aria-live="polite"></p>
       </div>
-      <p class="lede">Una sola publicación aparece en todas las categorías y zonas que elijas. Primero revisamos tu solicitud y, si la aceptamos, pagas y se publica.</p>
+      <p class="lede">Una sola publicación aparece en todas las categorías y zonas que elijas. Primero revisamos tu solicitud y, si la aceptamos, se publica (el espacio es gratis durante el lanzamiento).</p>
       <ol class="wprog" id="wprog" aria-label="Pasos del formulario">
         <li data-step="1"><span>1. Tu negocio</span></li>
         <li data-step="2"><span>2. Ubicación y categorías</span></li>
@@ -358,8 +368,18 @@
 
           <div class="wstep" data-step="5" hidden>
             <div class="recap" id="recap"></div>
+            <div class="acct" id="acctBox" hidden>
+              <h3 class="h3">Tu cuenta</h3>
+              <p class="fine">Con ella podrás ver el estado de tu solicitud, tu contrato, tus visitas y clics, y renovar. Es gratis.</p>
+              <div class="chips" role="group" aria-label="Tipo de acceso">
+                <button type="button" class="chip" id="acMode-up" aria-pressed="true">Crear mi cuenta</button>
+                <button type="button" class="chip" id="acMode-in" aria-pressed="false">Ya tengo cuenta</button>
+              </div>
+              <div class="fld"><label for="ac-mail">Correo de tu cuenta</label><input id="ac-mail" type="email" autocomplete="email" maxlength="120" placeholder="tucorreo@gmail.com"></div>
+              <div class="fld"><label for="ac-pass">Contraseña</label><input id="ac-pass" type="password" autocomplete="new-password" maxlength="100"><span class="fine" id="acHint">Mínimo 8 caracteres, con letras y números.</span></div>
+            </div>
             <label class="check"><input type="checkbox" id="x-terms"> <span>Acepto los <a href="#terminos">términos y condiciones</a> y la <a href="#privacidad">política de privacidad</a>. <span id="termsText"></span></span></label>
-            <p class="fine">No pagas nada ahora. Revisamos tu solicitud y, si la aceptamos, te mostramos cómo pagar por Nequi. Si no la aceptamos, no se cobra nada.</p>
+            <p class="fine">No pagas nada ahora. Revisamos tu solicitud y, si la aceptamos, si hay algo que pagar (diseño, por ejemplo) te enviamos la llave de pago por WhatsApp. Si no la aceptamos, no se cobra nada. El espacio publicitario es gratis durante el lanzamiento.</p>
           </div>
 
           <div class="bar-prog" id="prog" hidden><span id="progFill"></span></div>
