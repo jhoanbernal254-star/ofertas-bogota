@@ -90,6 +90,12 @@
       state.afterLogin = '#' + v; v = 'entrar';
       if (location.hash !== '#entrar') location.hash = '#entrar';
     }
+    if (v === 'entrar' && state.user) {
+      // Ya hay sesión: no se vuelve a pedir la contraseña, se manda directo al panel.
+      var to = state.afterLogin && state.afterLogin !== '#entrar' ? state.afterLogin : PB.homeHash();
+      state.afterLogin = PB.homeHash();
+      location.hash = to; return false;
+    }
     if (v === 'directorio' && p.q && (p.q.get('cat') || p.q.get('loc') || p.q.get('q'))) {
       PB.setFilters({ cat: p.q.get('cat') || '', loc: p.q.get('loc') || '', q: p.q.get('q') || '' });
       history.replaceState(null, '', '#directorio');
