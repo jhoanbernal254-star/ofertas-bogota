@@ -376,11 +376,28 @@
     PB.fillLocs($('fl-loc'), 'Toda Bogotá y la Sabana');
     $('heroBadge').textContent = C.localidades.length + ' localidades · ' + C.municipios.length + ' municipios de la Sabana';
     var pop = $('popular');
-    C.popular.forEach(function (p) {
-      var b = el('button', '', p[0]); b.type = 'button';
-      b.addEventListener('click', function () { PB.setFilters({ q: p[1], loc: p[2], cat: p[3] }); PB.go('#directorio'); });
-      pop.appendChild(b);
-    });
+    // Búsquedas populares: se muestran 3 en fila y van rotando solas (se pausan al pasar el mouse).
+    var popI = 0, popHover = false, POPN = 3;
+    function drawPop() {
+      pop.textContent = '';
+      for (var k = 0; k < Math.min(POPN, C.popular.length); k++) (function (p) {
+        var b = el('button', '', p[0]); b.type = 'button';
+        b.addEventListener('click', function () { PB.setFilters({ q: p[1], loc: p[2], cat: p[3] }); PB.go('#directorio'); });
+        pop.appendChild(b);
+      })(C.popular[(popI + k) % C.popular.length]);
+    }
+    drawPop();
+    pop.addEventListener('mouseenter', function () { popHover = true; });
+    pop.addEventListener('mouseleave', function () { popHover = false; });
+    pop.addEventListener('focusin', function () { popHover = true; });
+    pop.addEventListener('focusout', function () { popHover = false; });
+    if (C.popular.length > POPN) setInterval(function () {
+      if (popHover || document.hidden || state.view !== 'inicio') return;
+      popI = (popI + POPN) % C.popular.length;
+      if (PB.reduce) { drawPop(); return; }
+      pop.classList.add('out');
+      setTimeout(function () { drawPop(); pop.classList.remove('out'); }, 350);
+    }, 4500);
     $('heroSearch').addEventListener('submit', function (e) {
       e.preventDefault();
       PB.setFilters({ q: $('hs-q').value.trim(), loc: $('hs-loc').value, cat: $('hs-cat').value });

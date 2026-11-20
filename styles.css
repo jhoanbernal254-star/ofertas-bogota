@@ -150,7 +150,9 @@ h1, h2, h3, h4 { font-family: var(--font-h); margin: 0; letter-spacing: -0.02em;
 .hsearch .btn { min-height: 52px; border-radius: 12px; padding: 0 24px; }
 .hero-pop { margin: 18px 0 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; color: #B8C5E6; font-size: 14px; }
 .pop-list { display: flex; flex-wrap: wrap; gap: 8px; }
-.pop-list button { border: 1px solid rgba(255, 255, 255, 0.28); background: rgba(255, 255, 255, 0.06); color: #E8EEFC; padding: 7px 14px; border-radius: 999px; font-size: 14px; }
+.pop-list { transition: opacity .35s ease; }
+.pop-list.out { opacity: 0; }
+.pop-list button { border: 1px solid rgba(255, 255, 255, 0.28); background: rgba(255, 255, 255, 0.06); color: #E8EEFC; padding: 5px 12px; border-radius: 999px; font-size: 13px; white-space: nowrap; }
 .pop-list button:hover { border-color: var(--yellow); color: var(--yellow); }
 @media (max-width: 860px) {
   .hsearch { grid-template-columns: 1fr; }
@@ -673,7 +675,7 @@ dialog::backdrop { background: rgba(8, 14, 42, 0.6); }
 .pop-price{margin:.1rem 0 0;font-size:.88rem}
 .pop-price s{opacity:.55}
 .pop-price b{color:#0a7a3d}
-.pop-list{margin:0;padding-left:1.1rem;display:grid;gap:.3rem;font-size:.9rem;flex:1}
+.pop-items{margin:0;padding-left:1.1rem;display:grid;gap:.3rem;font-size:.9rem;flex:1}
 .pop-box .acts{display:flex;gap:.6rem;flex-wrap:wrap}
 @keyframes popIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
 @media(max-width:700px){.pop-ov{align-items:flex-end;padding:0}.pop-box{border-radius:20px 20px 0 0;max-height:92vh}}

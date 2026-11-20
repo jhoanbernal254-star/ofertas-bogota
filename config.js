@@ -151,7 +151,15 @@ window.PB_CONFIG = {
   popular: [
     ['Restaurantes en Kennedy', '', 'Kennedy', 'Restaurantes y comidas'],
     ['Belleza en Chapinero', '', 'Chapinero', 'Belleza y cuidado personal'],
-    ['Reparación de celulares', 'celulares', '', '']
+    ['Reparación de celulares', 'celulares', '', ''],
+    ['Comidas en Suba', '', 'Suba', 'Restaurantes y comidas'],
+    ['Peluquerías en Engativá', 'peluquería', 'Engativá', ''],
+    ['Tecnología en Chapinero', '', 'Chapinero', 'Tecnología'],
+    ['Ropa en Kennedy', '', 'Kennedy', 'Ropa y calzado'],
+    ['Salud en Usaquén', '', 'Usaquén', 'Salud'],
+    ['Mecánica y repuestos', 'mecánica', '', ''],
+    ['Panaderías en Fontibón', 'panadería', 'Fontibón', ''],
+    ['Domicilios en Bogotá', 'domicilios', '', '']
   ],
 
   palettes: [

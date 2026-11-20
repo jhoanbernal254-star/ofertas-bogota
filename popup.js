@@ -11,7 +11,7 @@
     var b = el('div', 'pop-blk');
     var h = el('div', 'pop-h'); var ic = el('span', 'pop-ic'); ic.appendChild(PB.ic(icon)); h.appendChild(ic);
     var t = el('div'); t.appendChild(el('h3', '', title)); t.appendChild(price); h.appendChild(t); b.appendChild(h);
-    var ul = el('ul', 'pop-list'); items.forEach(function (x) { ul.appendChild(el('li', '', x)); }); b.appendChild(ul);
+    var ul = el('ul', 'pop-items'); items.forEach(function (x) { ul.appendChild(el('li', '', x)); }); b.appendChild(ul);
     var btn = el('button', 'btn sm ghost', label); btn.type = 'button'; btn.addEventListener('click', go); b.appendChild(btn);
     return b;
   }
