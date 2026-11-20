@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Ofertas Bogotá · Directorio de negocios y ofertas en Bogotá y la Sabana</title>
+<meta name="description" content="Directorio comercial y vitrina de ofertas de Bogotá y la Sabana. Encuentra negocios por localidad, zona y categoría.">
+<meta name="theme-color" content="#0F1B3F">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23FFD21F'/%3E%3Cg transform='translate(14 14) scale(1.5)' fill='none' stroke='%230B1535' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z'/%3E%3Ccircle cx='7.5' cy='7.5' r='1' fill='%230B1535'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+<meta name="robots" content="index,follow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com; frame-src https://*.firebaseapp.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<link rel="canonical" href="https://ofertasbogota.lat/">
+<meta property="og:title" content="Ofertas Bogotá">
+<meta property="og:description" content="Directorio comercial y vitrina de ofertas de Bogotá y la Sabana.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ofertasbogota.lat/">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-entry="public" data-root="./">
+
+<!--BODY-->
+<div class="demo-bar" id="demoBar" hidden>
+  <div class="in"><strong>Vista de demostración:</strong> todo es de prueba y se guarda solo en este navegador. No se cobra dinero. <a href="#foot" id="demoMore">Opciones de prueba</a></div>
+</div>
+
+<div class="launch-bar" id="launchBar" hidden><div class="in"><span class="ic" data-ic="megaphone"></span><span id="launchText"></span> <a href="#anunciar">Publica tu negocio</a></div></div>
+
+<header class="top" id="top">
+  <div class="in top-in">
+    <a class="logo" href="#inicio" id="brandLink" aria-label="Ofertas Bogotá, ir al inicio">
+      <span class="logo-ic"><span class="ic" data-ic="tag"></span></span>
+      <span class="logo-tx"><b>Ofertas<i>.</i></b><small>BOGOTÁ</small></span>
+    </a>
+    <nav class="mainnav" id="mainNav" aria-label="Secciones">
+      <a href="#directorio" data-view="directorio">Directorio</a>
+      <a href="#ofertas" data-view="ofertas">Ofertas</a>
+      <a href="#planes" data-view="planes">Planes y precios</a>
+      <div class="nav-extra" id="navExtra"></div>
+    </nav>
+    <div class="top-act" id="topAct">
+      <a class="tlink" href="#entrar" id="loginLink">Ingresar</a>
+      <button class="tlink" type="button" id="logoutBtn" hidden>Salir</button>
+      <a class="btn yellow" href="#anunciar" id="ctaPublish"><span class="ic" data-ic="megaphone"></span><span>Publica tu negocio</span></a>
+      <button class="burger" type="button" id="burger" aria-label="Abrir el menú" aria-expanded="false" aria-controls="mainNav"><span class="ic" data-ic="menu"></span></button>
+    </div>
+  </div>
+</header>
+
+<div id="plusBox" class="plus-box" hidden></div>
+
+<main id="main">
+
+  <!-- Inicio -->
+  <section class="view" id="v-inicio" aria-labelledby="h-inicio">
+    <div class="hero">
+      <div class="in">
+        <p class="hero-badge"><span class="ic" data-ic="pin"></span><span id="heroBadge"></span></p>
+        <p class="hero-count" id="heroCount" hidden></p>
+        <h1 id="h-inicio">Lo que buscas, <em>cerca de ti</em> en Bogotá.</h1>
+        <p class="hero-sub">Negocios, promociones y servicios organizados por localidad, zona y categoría. Encuentra el restaurante de tu barrio, el taller de confianza o la oferta del día — y contáctalos al instante.</p>
+        <form class="hsearch" id="heroSearch" role="search" aria-label="Buscar negocios">
+          <label class="hs-q"><span class="ic" data-ic="search"></span><input id="hs-q" type="search" placeholder="Restaurantes, celulares, peluquería…" aria-label="Qué buscas" autocomplete="off"></label>
+          <label class="hs-sel"><span class="ic" data-ic="pin"></span><select id="hs-loc" aria-label="Ubicación"></select></label>
+          <label class="hs-sel"><span class="ic" data-ic="tag"></span><select id="hs-cat" aria-label="Categoría"></select></label>
+          <button class="btn yellow" type="submit"><span class="ic" data-ic="search"></span><span>Buscar</span></button>
+        </form>
+        <p class="hero-pop"><span>Popular:</span><span class="pop-list" id="popular"></span></p>
+      </div>
+    </div>
+
+    <div class="in vallas">
+      <div id="bannerBox" class="banner-box" hidden></div>
+    </div>
+
+    <section class="sec">
+      <div class="in">
+        <p class="eyebrow">Explora por categoría</p>
+        <h2 class="h2">¿Qué necesitas hoy?</h2>
+        <div class="cats" id="catGrid"></div>
+      </div>
+    </section>
+
+    <section class="sec tint" id="secDest" hidden>
+      <div class="in">
+        <div class="sec-row">
+          <div>
+            <p class="eyebrow">Vitrina de portada</p>
+            <h2 class="h2">Ofertas destacadas de la semana</h2>
+          </div>
+          <a class="btn white" href="#ofertas"><span>Ver todas las ofertas</span><span class="ic" data-ic="arrow"></span></a>
+        </div>
+        <div class="deals" id="gridDest"></div>
+      </div>
+    </section>
+
+    <section class="sec">
+      <div class="in">
+        <p class="eyebrow">Explora por ubicación</p>
+        <h2 class="h2">Tu localidad, tu zona, tu barrio</h2>
+        <div class="loc-wrap">
+          <div class="locs" id="locGrid"></div>
+          <aside class="muni">
+            <h3>Municipios cercanos</h3>
+            <p>Ofertas Bogotá crece hacia la Sabana.</p>
+            <div class="muni-list" id="muniList"></div>
+            <button class="muni-more" type="button" id="locMore">Ver las 20 localidades <span class="ic" data-ic="arrow"></span></button>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec">
+      <div class="in">
+        <div class="biz">
+          <div class="biz-l">
+            <p class="eyebrow y">Para comerciantes</p>
+            <h2 class="h2">Haz que tu barrio te encuentre.</h2>
+            <p>Publica tu negocio una sola vez y aparece en todas tus categorías y zonas. Elige el espacio, el tiempo de publicación y, si no tienes pieza gráfica, nuestro equipo la diseña por ti.</p>
+            <ul class="biz-pts">
+              <li><span class="ic" data-ic="tag"></span><span>Promociones con sello de oferta</span></li>
+              <li><span class="ic" data-ic="palette"></span><span id="bizDesign">Diseño publicitario</span></li>
+            </ul>
+            <div class="acts"><a class="btn yellow" href="#anunciar">Publica tu negocio</a><a class="btn ghost-w" href="#planes">Ver planes y precios</a></div>
+          </div>
+          <div class="biz-r" id="bizPlans"></div>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <!-- Directorio -->
+  <section class="view" id="v-directorio" aria-labelledby="h-dir" hidden>
+    <div class="dhead">
+      <div class="in">
+        <p class="crumbs"><a href="#inicio">Inicio</a> / <span>Directorio</span></p>
+        <h1 class="h1" id="h-dir">Negocios en Bogotá y la Sabana</h1>
+        <form class="dsearch" id="dirSearch" role="search" aria-label="Buscar en el directorio">
+          <label class="ds-q"><span class="ic" data-ic="search"></span><input id="fl-q" type="search" placeholder="Busca negocios, productos o servicios" aria-label="Buscar" autocomplete="off"></label>
+          <button class="btn yellow" type="submit">Buscar</button>
+          <button class="btn ghost-w filter-toggle" type="button" id="filterToggle" aria-expanded="false" aria-controls="filterPanel"><span class="ic" data-ic="layers"></span><span>Filtros</span></button>
+        </form>
+      </div>
+    </div>
+    <div class="in dir-body">
+      <aside class="side" id="filterPanel">
+        <div class="panel">
+          <h3><span class="ic" data-ic="pin"></span>Ubicación</h3>
+          <select id="fl-loc" aria-label="Localidad o municipio"></select>
+          <input id="fl-zona" type="text" placeholder="Zona o sector (opcional)" aria-label="Zona o sector" autocomplete="off">
+        </div>
+        <div class="panel">
+          <h3><span class="ic" data-ic="layers"></span>Categoría</h3>
+          <div class="catlist" id="catList"></div>
+        </div>
+        <button class="btn ghost sm" type="button" id="clearFilters">Limpiar filtros</button>
+      </aside>
+      <div class="res">
+        <p class="count" id="resultCount" aria-live="polite"></p>
+        <p class="note" id="dataNote" hidden></p>
+        <div class="grid" id="dirGrid"></div>
+        <div class="card empty" id="emptyBox" hidden></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ofertas -->
+  <section class="view" id="v-ofertas" aria-labelledby="h-ofertas" hidden>
+    <div class="dhead">
+      <div class="in">
+        <p class="crumbs"><a href="#inicio">Inicio</a> / <span>Ofertas</span></p>
+        <h1 class="h1" id="h-ofertas">Ofertas de la semana</h1>
+        <p class="dsub">Promociones vigentes de negocios de toda la ciudad.</p>
+      </div>
+    </div>
+    <div class="in dir-body one">
+      <div class="res">
+        <p class="count" id="offerCount"></p>
+        <div class="grid" id="offerGrid"></div>
+        <div class="card empty" id="offerEmpty" hidden></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Planes y precios -->
+  <section class="view" id="v-planes" aria-labelledby="h-planes" hidden>
+    <div class="dhead">
+      <div class="in">
+        <p class="crumbs"><a href="#inicio">Inicio</a> / <span>Planes y precios</span></p>
+        <h1 class="h1" id="h-planes">Planes y servicios</h1>
+        <p class="dsub">Publicidad, diseño y páginas web para tu negocio, desde una sola plataforma. No pagas por adelantado: primero revisamos tu solicitud.</p>
+      </div>
+    </div>
+    <div class="in sec">
+      <p class="eyebrow">Tiempo de publicación</p>
+      <div id="plLaunchSlot"></div>
+      <h2 class="h2">Publicidad en Ofertas Bogotá</h2>
+      <p class="lede">Aparece por localidad, barrio y categoría. Elige el espacio y por cuánto tiempo.</p>
+      <p class="eyebrow">Tiempo de publicación</p>
+      <div class="chips" id="plDurs" role="group" aria-label="Tiempo de publicación"></div>
+      <div class="plan-grid" id="plGrid"></div>
+      <div id="plMore"></div>
+      <h2 class="h2 mt">Cómo funciona</h2>
+      <ol class="how" id="plHow">
+        <li><b>Cuéntanos de tu negocio.</b><span>Llenas el formulario en 5 pasos y subes tu imagen, o pides que te la diseñemos.</span></li>
+        <li><b>Revisamos tu solicitud.</b><span>Si la aceptamos, te decimos si hay algo que pagar. Durante el lanzamiento, el espacio publicitario es gratis.</span></li>
+        <li><b>Pagas solo lo que tenga costo.</b><span>Diseño o páginas web: te enviamos la llave de pago por WhatsApp.</span></li>
+        <li><b>Te publicamos.</b><span>Tu negocio aparece en las categorías y zonas que elegiste. Puedes renovarlo cuando termine.</span></li>
+      </ol>
+      <div class="acts"><a class="btn yellow big" href="#anunciar">Publica tu negocio</a></div>
+    </div>
+  </section>
+
+  <!-- Ficha del negocio -->
+  <section class="view" id="v-ficha" hidden aria-label="Ficha del negocio">
+    <div id="fichaBody"></div>
+  </section>
+
+  <!-- Publicar -->
+  <section class="view" id="v-anunciar" aria-labelledby="h-anunciar" hidden>
+    <div class="in wiz-wrap">
+      <p class="eyebrow">Para comerciantes</p>
+      <h1 class="h1 dark" id="h-anunciar">Publica tu negocio en Ofertas Bogotá</h1>
+      <div class="note" id="verifyBox" hidden>
+        <b>Verifica tu correo para enviar tu solicitud.</b>
+        <p class="fine">Te enviamos un enlace a <span id="verifyMail"></span>. Revisa también la carpeta de spam.</p>
+        <div class="acts"><button class="btn sm navy" type="button" id="verifyDone">Ya verifiqué mi correo</button><button class="btn sm ghost" type="button" id="verifyResend">Reenviar correo</button></div>
+        <p class="msg" id="verifyMsg" role="status" aria-live="polite"></p>
+      </div>
+      <p class="lede">Una sola publicación aparece en todas las categorías y zonas que elijas. Primero revisamos tu solicitud y, si la aceptamos, pagas y se publica.</p>
+      <ol class="wprog" id="wprog" aria-label="Pasos del formulario">
+        <li data-step="1"><span>1. Tu negocio</span></li>
+        <li data-step="2"><span>2. Ubicación y categorías</span></li>
+        <li data-step="3"><span>3. Diseño</span></li>
+        <li data-step="4"><span>4. Espacio y tiempo</span></li>
+        <li data-step="5"><span>5. Resumen y envío</span></li>
+      </ol>
+      <div class="wlayout">
+        <form class="wcard f" id="form" autocomplete="off" novalidate>
+
+          <div class="wstep" data-step="1">
+            <div class="fld">
+              <label for="f-brand">Nombre del negocio <span class="cnt" id="c-brand">0/40</span></label>
+              <input id="f-brand" type="text" maxlength="40" placeholder="Ej. Panadería La Espiga">
+            </div>
+            <div class="fld">
+              <label for="f-head">Título del anuncio <span class="cnt" id="c-head">0/60</span></label>
+              <input id="f-head" type="text" maxlength="60" placeholder="Ej. Desayuno completo + chocolate a $12.000">
+              <p class="fine">Lo primero que verán los clientes. Menciona tu oferta. Si subes tu propio diseño, es opcional.</p>
+            </div>
+            <div class="fld">
+              <label for="f-body">Descripción <span class="cnt" id="c-body">0/300</span></label>
+              <textarea id="f-body" maxlength="300" rows="3"></textarea>
+              <p class="fine">Productos, servicios, horarios y lo que te hace diferente.</p>
+            </div>
+            <div class="two">
+              <div class="fld">
+                <label for="f-offer">Sello de oferta (opcional) <span class="cnt" id="c-offer">0/16</span></label>
+                <input id="f-offer" type="text" maxlength="16" placeholder="Ej. 2x1, -25%, $49.900">
+              </div>
+              <div class="fld">
+                <label for="f-hours">Horario (opcional) <span class="cnt" id="c-hours">0/70</span></label>
+                <input id="f-hours" type="text" maxlength="70" placeholder="Ej. Lun–Sáb 8 a. m. – 6 p. m.">
+                <p class="fine" id="hoursHint"></p>
+              </div>
+            </div>
+            <p class="sub">Datos para tu contrato (no se publican)</p>
+            <div class="two">
+              <div class="fld"><label for="f-legal">Nombre completo o razón social</label><input id="f-legal" type="text" maxlength="80" autocomplete="name"></div>
+              <div class="fld"><label for="f-doc">Cédula o NIT</label><input id="f-doc" type="text" maxlength="20" inputmode="numeric"></div>
+            </div>
+            <p class="sub">Contacto público (pon al menos uno)</p>
+            <div class="two">
+              <div class="fld"><label for="f-wa">WhatsApp de contacto</label><input id="f-wa" type="text" inputmode="tel" placeholder="300 123 4567"></div>
+              <div class="fld"><label for="f-phone">Teléfono</label><input id="f-phone" type="text" inputmode="tel" placeholder="Opcional"></div>
+            </div>
+            <div class="two">
+              <div class="fld"><label for="f-email">Correo</label><input id="f-email" type="email" inputmode="email" placeholder="Opcional"></div>
+              <div class="fld"><label for="f-web">Sitio web o red social</label><input id="f-web" type="text" inputmode="url" placeholder="https://"></div>
+            </div>
+            <p class="fine">Estos datos se publican tal cual en la ficha de tu negocio. Escribe solo lo que quieras que vea todo el mundo.</p>
+          </div>
+
+          <div class="wstep" data-step="2" hidden>
+            <div class="two">
+              <div class="fld"><label for="f-loc">Localidad o municipio</label><select id="f-loc"></select></div>
+              <div class="fld">
+                <label for="f-barrio">Zona o sector (opcional) <span class="cnt" id="c-barrio">0/60</span></label>
+                <input id="f-barrio" type="text" maxlength="60" list="zonaList" placeholder="Toda la localidad" disabled>
+                <datalist id="zonaList"></datalist>
+              </div>
+            </div>
+            <div class="fld">
+              <label for="f-addr">Dirección (opcional) <span class="cnt" id="c-addr">0/100</span></label>
+              <input id="f-addr" type="text" maxlength="100" placeholder="Ej. Av. Suba #127-45, local 302">
+            </div>
+            <div class="fld">
+              <span class="lbl" id="l-cats">Categorías</span>
+              <p class="fine">Elige hasta 3. Tu anuncio aparece en todas, sin duplicarse.</p>
+              <div class="catpick" id="catPick" role="group" aria-labelledby="l-cats"></div>
+            </div>
+          </div>
+
+          <div class="wstep" data-step="3" hidden>
+            <div class="opts" role="group" aria-label="Tu diseño">
+              <button class="opt" type="button" id="optOwn" aria-pressed="true">
+                <span class="opt-ic"><span class="ic" data-ic="upload"></span></span>
+                <span><b>Ya tengo mi diseño</b><small>Sube tu imagen publicitaria en JPG o PNG.</small></span>
+              </button>
+              <button class="opt" type="button" id="optNeed" aria-pressed="false">
+                <span class="opt-ic"><span class="ic" data-ic="palette"></span></span>
+                <span><b>Necesito un diseño</b><small id="needNote">Nuestro equipo lo crea. Podrás pedir ajustes.</small></span>
+              </button>
+            </div>
+
+            <div id="grpOwn">
+              <div class="drop" id="dropBox">
+                <input id="f-file" type="file" accept="image/*" aria-label="Subir imagen">
+                <span class="drop-ic"><span class="ic" data-ic="imageplus"></span></span>
+                <b id="l-file">Haz clic para subir tu pieza</b>
+                <small id="fileHint"></small>
+              </div>
+              <div class="picked" id="picked" hidden>
+                <span id="pickedName"></span>
+                <button class="btn sm ghost" type="button" id="clearFile">Quitar</button>
+              </div>
+              <p class="fine warn" id="sizeWarn" hidden></p>
+              <div class="fld" id="palBox">
+                <span class="lbl" id="l-pal">Color de la tarjeta si no subes imagen</span>
+                <div class="pals" id="pals" role="group" aria-labelledby="l-pal"></div>
+              </div>
+            </div>
+
+            <div id="designMore" hidden>
+              <div class="fld">
+                <span class="lbl" id="l-pieces">Cuántas piezas</span>
+                <div class="chips" id="pieces" role="group" aria-labelledby="l-pieces"></div>
+              </div>
+              <div class="fld">
+                <label for="f-brief">Cuéntanos qué necesitas <span class="cnt" id="c-brief">0/400</span></label>
+                <textarea id="f-brief" maxlength="400" rows="4" placeholder="Colores, estilo, textos que deben aparecer. Si tienes logo o fotos, súbelos arriba como referencia."></textarea>
+              </div>
+              <div class="drop mini">
+                <input id="f-file2" type="file" accept="image/*" aria-label="Subir logo o referencia">
+                <b>Logo o referencia (opcional)</b>
+                <small>Tu logo o una foto que te guste.</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="wstep" data-step="4" hidden>
+            <div class="fld" id="durBox">
+              <span class="lbl" id="l-dur">Tiempo de publicación</span>
+              <div class="chips" id="durs" role="group" aria-labelledby="l-dur"></div>
+              <p class="fine">Máximo 1 mes por pedido. Cuando termine, puedes renovarlo.</p>
+            </div>
+            <div class="fld">
+              <span class="lbl" id="l-plan">Espacio</span>
+              <div class="plans" id="plans" role="group" aria-labelledby="l-plan"></div>
+            </div>
+          </div>
+
+          <div class="wstep" data-step="5" hidden>
+            <div class="recap" id="recap"></div>
+            <label class="check"><input type="checkbox" id="x-terms"> <span>Acepto los <a href="#terminos">términos y condiciones</a> y la <a href="#privacidad">política de privacidad</a>. <span id="termsText"></span></span></label>
+            <p class="fine">No pagas nada ahora. Revisamos tu solicitud y, si la aceptamos, te mostramos cómo pagar por Nequi. Si no la aceptamos, no se cobra nada.</p>
+          </div>
+
+          <div class="bar-prog" id="prog" hidden><span id="progFill"></span></div>
+          <p class="msg" id="msg" role="status" aria-live="polite"></p>
+          <div class="wnav">
+            <button class="btn ghost" type="button" id="wBack"><span class="ic flip" data-ic="chevron"></span><span>Atrás</span></button>
+            <button class="btn navy" type="button" id="wNext"><span>Continuar</span><span class="ic" data-ic="chevron"></span></button>
+            <button class="btn yellow" type="submit" id="payBtn">Enviar solicitud</button>
+          </div>
+        </form>
+
+        <aside class="wside">
+          <div class="sum" id="sum"></div>
+          <p class="fine side-note">¿Dudas sobre planes o diseños? Escríbenos por WhatsApp desde la página de planes.</p>
+          <div id="pvWrap">
+            <p class="sub">Así se verá</p>
+            <div class="pvbox" id="preview"></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- Entrar -->
+  <section class="view" id="v-entrar" aria-labelledby="h-auth" hidden>
+    <div class="in narrow">
+      <h1 class="h1 dark" id="h-auth">Ingresar</h1>
+      <form class="card authbox f" id="authForm" novalidate>
+        <div class="fld" id="nameFld" hidden>
+          <label for="au-name">Tu nombre</label>
+          <input id="au-name" type="text" maxlength="60" autocomplete="name">
+        </div>
+        <div class="fld">
+          <label for="au-email">Correo</label>
+          <input id="au-email" type="email" autocomplete="email" inputmode="email">
+        </div>
+        <div class="fld">
+          <label for="au-pass">Contraseña</label>
+          <input id="au-pass" type="password" autocomplete="current-password">
+        </div>
+        <button class="btn navy" type="submit" id="authSubmit">Ingresar</button>
+        <div class="acts">
+          <button class="btn sm ghost" type="button" id="authToggle">Crear una cuenta</button>
+          <button class="btn sm ghost" type="button" id="authReset">Olvidé mi contraseña</button>
+        </div>
+        <p class="msg" id="authMsg" role="status" aria-live="polite"></p>
+        <div id="demoLogins" hidden>
+          <p class="sub">Cuentas de prueba</p>
+          <div class="acts">
+            <button class="btn sm ghost" type="button" id="loginAdmin">Entrar como administrador</button>
+            <button class="btn sm ghost" type="button" id="loginAdv">Entrar como comerciante</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Mi panel -->
+  <section class="view" id="v-cuenta" aria-labelledby="h-cta" hidden>
+    <div class="in panel-grid">
+      <aside class="pside">
+        <div class="pwho"><small>Comerciante</small><b id="pName"></b><span id="pMail"></span></div>
+        <a class="btn yellow wide" href="#anunciar"><span class="ic" data-ic="plus"></span><span>Nuevo anuncio</span></a>
+      </aside>
+      <div class="pmain">
+        <h1 class="h1 dark" id="h-cta">Mis anuncios</h1>
+        <p class="lede">Sigue cada etapa: solicitud, revisión, pago, publicación y vencimiento.</p>
+        <p class="msg" id="myMsg" role="status" aria-live="polite"></p>
+        <div class="list" id="myList"></div>
+        <h2 class="h3">Anuncios publicados</h2>
+        <div class="list" id="myAds"></div>
+        <h2 class="h3" id="noticeHead">Avisos</h2>
+        <p class="fine" id="noticeNote"></p>
+        <div class="list" id="myNotices"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Estado del pedido -->
+  <section class="view" id="v-pago" aria-labelledby="h-pago" hidden>
+    <div class="in narrow">
+      <div class="done-card" id="payCard"></div>
+    </div>
+  </section>
+
+  <!-- Contrato -->
+  <section class="view" id="v-contrato" aria-labelledby="h-contrato" hidden>
+    <div class="in narrow">
+      <div class="noprint acts"><a class="btn ghost" href="#cuenta" id="ctBack">← Volver</a><button class="btn navy" type="button" id="ctPrint">Imprimir o guardar en PDF</button></div>
+      <article class="contract" id="contractBody"></article>
+    </div>
+  </section>
+
+  <!-- Informe -->
+  <section class="view" id="v-informe" aria-label="Informe" hidden>
+    <div class="in narrow">
+      <div class="noprint acts"><a class="btn ghost" href="#cuenta" id="rpBack">← Volver</a><button class="btn navy" type="button" id="rpPrint">Imprimir o guardar en PDF</button></div>
+      <article class="report" id="reportBody"></article>
+    </div>
+  </section>
+
+  <!-- Legal -->
+  <section class="view" id="v-legal" aria-labelledby="h-legal" hidden>
+    <div class="in narrow">
+      <p><a href="#inicio" id="legalBack">← Volver</a></p>
+      <article class="legal" id="legalBody"></article>
+    </div>
+  </section>
+
+  <!-- Administrar -->
+  <section class="view" id="v-admin" aria-labelledby="h-admin" hidden>
+    <div class="in admin-wrap">
+      <h1 class="h1 dark" id="h-admin">Administrar</h1>
+      <p class="lede">Solo lo ven los administradores.</p>
+      <p class="note bad" id="adminDenied" hidden>Tu cuenta no tiene permisos de administrador.</p>
+      <div class="admin-cols" id="adminBody">
+        <div class="stats" id="stats"></div>
+        <p class="msg" id="admMsg" role="status" aria-live="polite"></p>
+        <div>
+          <h2 class="h3">Reportes de anuncios</h2>
+          <div class="list" id="reportList"></div>
+          <h2 class="h3">Informes</h2>
+          <div class="card"><p class="fine">Resumen completo de todos los clientes: ingresos, qué se vendió más, quién tuvo más visitas, quién renueva y qué mejorar. Se guarda en PDF.</p><div class="acts"><a class="btn navy" href="#informe-admin">Ver informe general</a></div></div>
+          <h2 class="h3">Base de datos de clientes</h2>
+          <div class="card">
+            <p class="fine">Busca por número de contrato, referencia, nombre, cédula/NIT, teléfono, WhatsApp, correo o negocio. Sin escribir nada ves los 10 más recientes.</p>
+            <div class="fld"><label for="db-q">Buscar</label><input id="db-q" type="search" placeholder="Ej. OB-PUB-X8WIOJ-2026, 3001234567, Panadería…" autocomplete="off"></div>
+            <div class="acts"><button class="btn sm ghost" type="button" id="db-csv">Descargar todo (CSV)</button><span class="meta" id="db-count"></span></div>
+          </div>
+          <div class="list" id="db-res"></div>
+        </div>
+        <div>
+          <h2 class="h3">Solicitudes por revisar</h2>
+          <div class="list" id="reviewList"></div>
+        </div>
+        <div>
+          <h2 class="h3">Esperando pago</h2>
+          <div class="list" id="payList"></div>
+        </div>
+        <div>
+          <div class="crow">
+            <h2 class="h3">Anuncios</h2>
+            <button class="btn sm navy" type="button" id="newAd">Crear anuncio</button>
+          </div>
+          <div class="filters" id="adFilters" role="group" aria-label="Filtrar anuncios"></div>
+          <div class="list" id="adList"></div>
+        </div>
+        <div>
+          <h2 class="h3">Todos los pedidos</h2>
+          <div class="filters" id="orderFilters" role="group" aria-label="Filtrar pedidos"></div>
+          <div class="list" id="orderList"></div>
+        </div>
+        <div>
+          <h2 class="h3">Precios, cupos y lanzamiento</h2>
+          <div class="card">
+            <p class="fine">Los precios son por el mes completo. Los días y semanas se calculan solos. Los cambios los ven los visitantes de inmediato.</p>
+            <div class="grid4">
+              <div class="fld"><label for="a-premium">Banner Plus</label><input id="a-premium" type="number" min="1500" step="500" inputmode="numeric"></div>
+              <div class="fld"><label for="a-banner">Banner principal</label><input id="a-banner" type="number" min="1500" step="500" inputmode="numeric"></div>
+              <div class="fld"><label for="a-destacado">Destacado</label><input id="a-destacado" type="number" min="1500" step="500" inputmode="numeric"></div>
+              <div class="fld"><label for="a-mediano">Mediano</label><input id="a-mediano" type="number" min="1500" step="500" inputmode="numeric"></div>
+            </div>
+            <div class="grid4">
+              <div class="fld"><label for="a-pequeno">Pequeño</label><input id="a-pequeno" type="number" min="1500" step="500" inputmode="numeric"></div>
+              <div class="fld"><label for="a-design">Diseño por pieza</label><input id="a-design" type="number" min="1500" step="500" inputmode="numeric"></div>
+            </div>
+            <div class="grid4">
+              <div class="fld"><label for="a-capp">Cupos Plus</label><input id="a-capp" type="number" min="1" max="10" inputmode="numeric"></div>
+              <div class="fld"><label for="a-capb">Cupos banner</label><input id="a-capb" type="number" min="1" max="50" inputmode="numeric"></div>
+              <div class="fld"><label for="a-capd">Cupos destacado</label><input id="a-capd" type="number" min="1" max="200" inputmode="numeric"></div>
+            </div>
+            <div class="grid4">
+              <div class="fld"><label for="a-luntil">El lanzamiento gratis termina el</label><input id="a-luntil" type="date"></div>
+            </div>
+            <label class="check"><input type="checkbox" id="a-lenabled"> <span>Lanzamiento activo: todos los espacios publicitarios cuestan $0 y se muestra el precio normal tachado (el diseño y las páginas web siguen con precio)</span></label>
+            <div class="acts"><button class="btn sm navy" type="button" id="saveCfg">Guardar</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot" id="foot">
+  <div class="hazard" aria-hidden="true"></div>
+  <div class="in">
+    <div class="fgrid">
+      <div class="fabout">
+        <a class="logo" href="#inicio" aria-label="Ofertas Bogotá, ir al inicio">
+          <span class="logo-ic"><span class="ic" data-ic="tag"></span></span>
+          <span class="logo-tx"><b>Ofertas<i>.</i></b><small>BOGOTÁ</small></span>
+        </a>
+        <p>El directorio comercial y la vitrina de ofertas de Bogotá y sus municipios cercanos. Conectamos negocios locales con las personas que los buscan.</p>
+      </div>
+      <div><h4>Categorías</h4><ul id="fCats"></ul></div>
+      <div><h4>Localidades</h4><ul id="fLocs"></ul></div>
+      <div>
+        <h4>Comerciantes</h4>
+        <ul>
+          <li><a href="#anunciar">Publicar un anuncio</a></li>
+          <li><a href="#planes">Diseño y páginas web</a></li>
+          <li><a href="#planes">Planes y precios</a></li>
+          <li><a href="#cuenta" id="navCuenta">Mi panel</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="demo" id="demoBanner" hidden>
+      <strong>Modo demostración</strong>
+      <p>Todo es de prueba y vive solo en este navegador (en otro celular o computador no se ve lo mismo). No se cobra dinero. Entra con las cuentas de prueba para ver el lado del comerciante y el del administrador.</p>
+      <div class="acts">
+        <button class="btn sm ghost-w" type="button" id="seedBtn">Cargar anuncios de ejemplo</button>
+        <button class="btn sm ghost-w" type="button" id="resetBtn">Borrar datos de prueba</button>
+      </div>
+    </div>
+    <div class="fbar">
+      <p id="footText"></p>
+      <p class="legal-links"><a href="#terminos">Términos y condiciones</a><span aria-hidden="true"> · </span><a href="#privacidad">Política de privacidad</a><span id="adminSep" hidden aria-hidden="true"> · </span><a href="#admin" id="navAdmin" hidden>Administrar</a></p>
+    </div>
+  </div>
+</footer>
+
+<dialog id="dlgReport" aria-label="Reportar anuncio">
+  <form id="repForm" method="dialog" class="dlg-form">
+    <h2>Reportar anuncio</h2>
+    <p class="fine">Anuncio: <b id="rep-ad"></b>. Revisamos cada reporte y, si hace falta, lo retiramos.</p>
+    <div class="fld"><label for="rep-reason">Motivo</label><select id="rep-reason"></select></div>
+    <div class="fld"><label for="rep-note">Cuéntanos más (opcional)</label><textarea id="rep-note" rows="3" maxlength="300"></textarea></div>
+    <div class="fld"><label for="rep-contact">Tu contacto, por si necesitamos preguntarte (opcional)</label><input id="rep-contact" type="text" maxlength="60"></div>
+    <p class="msg" id="rep-msg" role="status"></p>
+    <div class="acts"><button class="btn yellow" type="submit" id="rep-send">Enviar reporte</button><button class="btn ghost" type="button" id="rep-cancel">Cancelar</button></div>
+  </form>
+</dialog>
+
+<dialog id="dlgEdit" aria-label="Editar anuncio">
+  <form class="dlg f" id="editForm" novalidate>
+    <h2 id="edTitle">Anuncio</h2>
+    <div class="two">
+      <div class="fld"><label for="ed-brand">Negocio</label><input id="ed-brand" type="text" maxlength="40"></div>
+      <div class="fld"><label for="ed-head">Título</label><input id="ed-head" type="text" maxlength="60"></div>
+    </div>
+    <div class="fld"><label for="ed-body">Descripción</label><textarea id="ed-body" maxlength="300" rows="3"></textarea></div>
+    <div class="two">
+      <div class="fld"><label for="ed-offer">Sello de oferta</label><input id="ed-offer" type="text" maxlength="16"></div>
+      <div class="fld"><label for="ed-hours">Horario</label><input id="ed-hours" type="text" maxlength="70"></div>
+    </div>
+    <div class="fld"><span class="lbl">Categorías (hasta 3)</span><div class="catpick" id="ed-cats"></div></div>
+    <div class="two">
+      <div class="fld"><label for="ed-loc">Localidad o municipio</label><select id="ed-loc"></select></div>
+      <div class="fld"><label for="ed-barrio">Zona o sector</label><input id="ed-barrio" type="text" maxlength="60"></div>
+    </div>
+    <div class="fld"><label for="ed-addr">Dirección</label><input id="ed-addr" type="text" maxlength="100"></div>
+    <div class="two">
+      <div class="fld"><label for="ed-wa">WhatsApp</label><input id="ed-wa" type="text" inputmode="tel"></div>
+      <div class="fld"><label for="ed-phone">Teléfono</label><input id="ed-phone" type="text" inputmode="tel"></div>
+    </div>
+    <div class="two">
+      <div class="fld"><label for="ed-email">Correo</label><input id="ed-email" type="email"></div>
+      <div class="fld"><label for="ed-web">Sitio web o red social</label><input id="ed-web" type="text" inputmode="url"></div>
+    </div>
+    <div class="two">
+      <div class="fld"><label for="ed-tier">Tipo de espacio</label><select id="ed-tier"></select></div>
+      <div class="fld"><label for="ed-pal">Color de fondo</label><select id="ed-pal"></select></div>
+    </div>
+    <div class="two">
+      <div class="fld"><label for="ed-ends">Vence el</label><input id="ed-ends" type="date"></div>
+      <div class="fld"><label for="ed-file">Imagen (reemplaza la actual)</label><input id="ed-file" type="file" accept="image/*"></div>
+    </div>
+    <label class="check"><input type="checkbox" id="ed-active"> <span>Publicado y visible para todos</span></label>
+    <div class="bar-prog" id="edProg" hidden><span id="edProgFill"></span></div>
+    <p class="msg" id="edMsg" role="status" aria-live="polite"></p>
+    <div class="acts">
+      <button class="btn navy" type="submit" id="edSave">Guardar</button>
+      <button class="btn ghost" type="button" id="edCancel">Cancelar</button>
+    </div>
+  </form>
+</dialog>
+<!--/BODY-->
+
+
+<script src="config.js"></script>
+<script src="backend-firebase.js"></script>
+<script src="legal.js"></script>
+<script src="ui.js"></script>
+<script src="extras.js"></script>
+<script src="services.js"></script>
+<script src="pages.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
