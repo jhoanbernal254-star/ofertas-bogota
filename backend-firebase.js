@@ -34,7 +34,8 @@
     return list;
   }
   // Reduce la imagen y la devuelve como texto (data URL) para guardarla en Firestore.
-  function prepImage(file, onProgress, size) {
+  function prepImage(file, onProgress, size, limit) {
+    limit = limit || 400000;
     return new Promise(function (resolve, reject) {
       if (!/^image\//.test(file.type)) { reject(fail('bad-file', 'Por ahora solo se aceptan imágenes.')); return; }
       var src = URL.createObjectURL(file);
@@ -54,8 +55,8 @@
         }
         URL.revokeObjectURL(src);
         var q = 0.75, url = cv.toDataURL('image/jpeg', q);
-        while (url.length > 400000 && q > 0.35) { q -= 0.1; url = cv.toDataURL('image/jpeg', q); }
-        if (url.length > 400000) { reject(fail('too-big', 'La imagen es muy pesada. Prueba con otra más pequeña.')); return; }
+        while (url.length > limit && q > 0.3) { q -= 0.1; url = cv.toDataURL('image/jpeg', q); }
+        if (url.length > limit) { reject(fail('too-big', 'La imagen es muy pesada. Prueba con otra más pequeña.')); return; }
         if (onProgress) onProgress(100);
         resolve({ url: url, type: 'image' });
       };
@@ -144,9 +145,10 @@
       if (!snap.exists() || snap.data().uid !== u.uid) throw fail('permission-denied', 'No puedes renovar este anuncio.');
       var ad = snap.data();
       ['brand', 'headline', 'body', 'categoria', 'cats', 'offer', 'hours', 'localidad', 'barrio', 'address', 'whatsapp', 'phone', 'mail', 'web', 'pal'].forEach(function (k) { o[k] = ad[k] == null ? o[k] : ad[k]; });
-      o.tier = ad.tier; o.media = ad.media || null;
+      o.tier = ad.tier; o.media = ad.media || null; o.media2 = ad.media2 || null;
     } else if (d.file) {
       o.media = await prepImage(d.file, onProgress, o.tier && !o.designPieces ? C.tiers[o.tier].size : null);
+      if (d.fileTop && C.hasTop(o.tier) && !o.designPieces) o.media2 = await prepImage(d.fileTop, null, C.topSize, 220000);
     }
     var q = C.quote(o, null, [], [], Date.now());
     o.amount = q.ok ? q.amount : 0; // es solo un estimado: el monto final lo fija el administrador al aceptar
@@ -161,6 +163,7 @@
       categoria: o.categoria, cats: o.cats || [], offer: o.offer || '', hours: o.hours || '', localidad: o.localidad, barrio: o.barrio || '', address: o.address || '',
       whatsapp: o.whatsapp || '', phone: o.phone || '', mail: o.mail || '', web: o.web || '', pal: o.pal || 0,
       media: o.media ? { url: o.media.url, type: o.media.type } : null,
+      media2: o.media2 ? { url: o.media2.url, type: 'image' } : null,
       createdAt: now, active: !draft, startsAt: draft ? null : now, endsAt: draft ? null : now + (o.days || C.termDays) * DAY
     };
     COUNTERS.forEach(function (k) { ad[k] = 0; });
@@ -215,13 +218,14 @@
     return F.updateDoc(F.doc(db, 'orders', id), { status: 'rechazado', decidedAt: Date.now(), rejectReason: String(reason || '').slice(0, 200) });
   };
 
-  B.saveAd = async function (d, file, onProgress) {
+  B.saveAd = async function (d, file, onProgress, fileTop) {
     var now = Date.now();
     var fields = {
       brand: d.brand, headline: d.headline, body: d.body, categoria: d.categoria, cats: d.cats || [], offer: d.offer || '', hours: d.hours || '', localidad: d.localidad, barrio: d.barrio,
       address: d.address, whatsapp: d.whatsapp, phone: d.phone, mail: d.mail, web: d.web, pal: d.pal, tier: d.tier, active: !!d.active
     };
     if (file) { fields.media = await prepImage(file, onProgress, C.tiers[d.tier] && C.tiers[d.tier].size); }
+    if (fileTop) { fields.media2 = await prepImage(fileTop, null, C.topSize, 220000); }
     if (d.endsAt) fields.endsAt = d.endsAt;
     if (fields.active) {
       if (!d.startsAt) fields.startsAt = now;
@@ -233,7 +237,7 @@
       return d.id;
     }
     var ref = F.doc(F.collection(db, 'ads'));
-    var ad = Object.assign({ uid: auth.currentUser.uid, orderId: null, createdAt: now, startsAt: fields.active ? now : null, endsAt: fields.endsAt || null, media: null }, fields);
+    var ad = Object.assign({ uid: auth.currentUser.uid, orderId: null, createdAt: now, startsAt: fields.active ? now : null, endsAt: fields.endsAt || null, media: null, media2: null }, fields);
     if (fields.active && !ad.endsAt) ad.endsAt = now + C.termDays * DAY;
     COUNTERS.forEach(function (k) { ad[k] = 0; });
     await F.setDoc(ref, ad);
@@ -257,6 +261,9 @@
       if (!ad || !ad.endsAt) f.endsAt = now + C.termDays * DAY;
     }
     await F.updateDoc(F.doc(db, 'ads', id), f);
+  };
+  B.setArchived = function (kind, id, val) {
+    return F.updateDoc(F.doc(db, kind === 'ad' ? 'ads' : 'orders', id), { archived: !!val });
   };
   B.renewAd = async function (id, ad) {
     var now = Date.now();

@@ -9,7 +9,7 @@
   Los valores de aquí son los iniciales; lo que guardes desde el panel de administración tiene prioridad.
 */
 window.PB_CONFIG = {
-  version: '2026.11.20-d',
+  version: '2026.11.21-e',
   mode: 'firebase', // 'demo' | 'firebase'
   brand: 'Ofertas Bogotá', // nombre provisional, cámbialo cuando lo definas
   functionsRegion: 'us-central1',
@@ -48,16 +48,15 @@ window.PB_CONFIG = {
 
   terms: 'Primero envías tu solicitud y no pagas nada. Si la aceptamos, tu anuncio se publica; si hay algo que pagar (por ejemplo el diseño), te enviamos la llave de pago por WhatsApp y se publica cuando confirmamos el pago. Durante el lanzamiento el espacio publicitario es gratis. Si no la aceptamos, no se cobra nada. Eliges cuánto dura (de 1 día a 1 mes) y puedes renovarla.',
 
-  // Tipos de espacio. "group" es el filtro "Tipo de anuncio": banner, destacado o estándar.
+  // Tipos de espacio. "group" es el filtro "Tipo de anuncio": plus, destacado o estándar.
   // "cap" es el máximo de anuncios activos al mismo tiempo (vacío = sin límite).
   tiers: {
-    premium: { label: 'Banner Plus', short: 'Plus', price: 150000, group: 'plus', cap: 1, size: { w: 1600, h: 320 }, note: 'Una franja visible en todas las páginas, también al filtrar' },
-    banner: { label: 'Banner principal', short: 'Banner', price: 60000, group: 'banner', cap: 3, size: { w: 1600, h: 500 }, note: 'Valla grande rotativa en la portada' },
-    destacado: { label: 'Anuncio destacado', short: 'Destacado', price: 40000, group: 'destacado', cap: 12, size: { w: 1200, h: 900 }, note: 'En las ofertas destacadas de la portada y arriba en el directorio' },
+    premium: { label: 'Banner Plus', short: 'Plus', price: 100000, group: 'plus', cap: 5, size: { w: 1200, h: 900 }, top: { w: 1600, h: 320 }, note: 'Arriba en todas las páginas (de lado a lado, rotando) y primero en las ofertas destacadas' },
+    destacado: { label: 'Anuncio destacado', short: 'Destacado', price: 40000, group: 'destacado', cap: 12, size: { w: 1200, h: 900 }, note: 'Sale en 2 lugares: arriba en todas las páginas (de lado a lado) y en las ofertas destacadas', top: { w: 1600, h: 320 } },
     mediano: { label: 'Espacio mediano', short: 'Mediano', price: 25000, group: 'estandar', size: { w: 800, h: 600 }, note: 'Ficha completa en el directorio, con foto grande' },
     pequeno: { label: 'Espacio pequeño', short: 'Pequeño', price: 15000, group: 'estandar', size: { w: 600, h: 600 }, note: 'Ficha en el directorio, en formato compacto' }
   },
-  groups: { banner: 'Banner principal', destacado: 'Anuncio destacado', estandar: 'Publicación estándar' },
+  groups: { plus: 'Banner Plus', destacado: 'Anuncio destacado', estandar: 'Publicación estándar' },
 
   // Servicio de diseño: precio de UNA pieza. El paquete de 3 piezas cuesta 2,5 veces y el de 5 piezas, 4 veces (20.000 / 50.000 / 80.000).
   design: { pricePerPiece: 20000, maxPieces: 5 },
@@ -311,6 +310,9 @@ window.PB_CONFIG.discPct = function (days) {
   return d && d.disc > 0 ? Math.round(d.disc * 100) : 0;
 };
 // Medida ideal de la imagen de cada espacio, por ejemplo "1600 × 320 px".
+window.PB_CONFIG.topSize = { w: 1600, h: 320 };
+// ¿Este espacio también sale en la franja de arriba (y por eso pide una segunda imagen)?
+window.PB_CONFIG.hasTop = function (tier) { return !!(window.PB_CONFIG.tiers[tier] && window.PB_CONFIG.tiers[tier].top); };
 window.PB_CONFIG.sizeLabel = function (tier) {
   var t = window.PB_CONFIG.tiers[tier];
   return t && t.size ? t.size.w + ' × ' + t.size.h + ' px' : '';

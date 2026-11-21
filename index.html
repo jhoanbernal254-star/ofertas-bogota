@@ -70,9 +70,19 @@
       </div>
     </div>
 
-    <div class="in vallas">
-      <div id="bannerBox" class="banner-box" hidden></div>
-    </div>
+    
+    <section class="sec vit" id="secVit" hidden>
+      <div class="in">
+        <div class="sec-row">
+          <div>
+            <p class="eyebrow">Vitrina</p>
+            <h2 class="h2">Negocios y promociones de hoy</h2>
+          </div>
+          <div class="vit-nav"><button class="btn white sm" type="button" id="vitPrev" aria-label="Anterior">‹</button><button class="btn white sm" type="button" id="vitNext" aria-label="Siguiente">›</button></div>
+        </div>
+        <div class="vit-track" id="vitTrack" tabindex="0" aria-label="Carrusel de negocios"></div>
+      </div>
+    </section>
 
     <section class="sec">
       <div class="in">
@@ -324,6 +334,8 @@
               </button>
             </div>
 
+            <p class="dest-note" id="destNote" hidden><b>Este plan sale en 2 lugares:</b> arriba de todas las páginas (banner de lado a lado) y en su espacio propio de la portada (valla o tarjeta destacada). Por eso pedimos <b>2 imágenes</b>: una para cada lugar.</p>
+
             <div id="grpOwn">
               <div class="drop" id="dropBox">
                 <input id="f-file" type="file" accept="image/*" aria-label="Subir imagen">
@@ -336,6 +348,20 @@
                 <button class="btn sm ghost" type="button" id="clearFile">Quitar</button>
               </div>
               <p class="fine warn" id="sizeWarn" hidden></p>
+              <div id="grpTop" hidden>
+                <span class="lbl">Imagen del banner de arriba</span>
+                <div class="drop" id="dropTop">
+                  <input id="f-file-top" type="file" accept="image/*" aria-label="Subir imagen del banner de arriba">
+                  <span class="drop-ic"><span class="ic" data-ic="imageplus"></span></span>
+                  <b>Haz clic para subir la imagen del banner</b>
+                  <small id="topHint"></small>
+                </div>
+                <div class="picked" id="pickedTop" hidden>
+                  <span id="pickedTopName"></span>
+                  <button class="btn sm ghost" type="button" id="clearTop">Quitar</button>
+                </div>
+                <p class="fine warn" id="sizeWarnTop" hidden></p>
+              </div>
               <div class="fld" id="palBox">
                 <span class="lbl" id="l-pal">Color de la tarjeta si no subes imagen</span>
                 <div class="pals" id="pals" role="group" aria-labelledby="l-pal"></div>
@@ -538,12 +564,21 @@
           <div class="list" id="orderList"></div>
         </div>
         <div>
+          <details class="arch-box" id="archBox">
+            <summary id="archSum">Archivo</summary>
+            <p class="fine">Aquí quedan lo rechazado, lo desactivado y lo que archives. No salen en las listas principales.</p>
+            <h3 class="h3">Anuncios archivados</h3>
+            <div class="list" id="archAds"></div>
+            <h3 class="h3">Pedidos archivados</h3>
+            <div class="list" id="archOrders"></div>
+          </details>
+        </div>
+        <div>
           <h2 class="h3">Precios, cupos y lanzamiento</h2>
           <div class="card">
             <p class="fine">Los precios son por el mes completo. Los días y semanas se calculan solos. Los cambios los ven los visitantes de inmediato.</p>
             <div class="grid4">
               <div class="fld"><label for="a-premium">Banner Plus</label><input id="a-premium" type="number" min="1500" step="500" inputmode="numeric"></div>
-              <div class="fld"><label for="a-banner">Banner principal</label><input id="a-banner" type="number" min="1500" step="500" inputmode="numeric"></div>
               <div class="fld"><label for="a-destacado">Destacado</label><input id="a-destacado" type="number" min="1500" step="500" inputmode="numeric"></div>
               <div class="fld"><label for="a-mediano">Mediano</label><input id="a-mediano" type="number" min="1500" step="500" inputmode="numeric"></div>
             </div>
@@ -553,7 +588,6 @@
             </div>
             <div class="grid4">
               <div class="fld"><label for="a-capp">Cupos Plus</label><input id="a-capp" type="number" min="1" max="10" inputmode="numeric"></div>
-              <div class="fld"><label for="a-capb">Cupos banner</label><input id="a-capb" type="number" min="1" max="50" inputmode="numeric"></div>
               <div class="fld"><label for="a-capd">Cupos destacado</label><input id="a-capd" type="number" min="1" max="200" inputmode="numeric"></div>
             </div>
             <div class="grid4">
@@ -651,6 +685,7 @@
     <div class="two">
       <div class="fld"><label for="ed-ends">Vence el</label><input id="ed-ends" type="date"></div>
       <div class="fld"><label for="ed-file">Imagen (reemplaza la actual)</label><input id="ed-file" type="file" accept="image/*"></div>
+      <div class="fld"><label for="ed-file-top">Imagen del banner de arriba (planes Destacado y Banner Plus · 1600 × 320 px)</label><input id="ed-file-top" type="file" accept="image/*"><span class="fine" id="edTopNow"></span></div>
     </div>
     <label class="check"><input type="checkbox" id="ed-active"> <span>Publicado y visible para todos</span></label>
     <div class="bar-prog" id="edProg" hidden><span id="edProgFill"></span></div>

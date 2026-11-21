@@ -2,9 +2,9 @@
 (function () {
   'use strict';
   var PB = window.PB, C = PB.C, $ = PB.$, el = PB.el, state = PB.state;
-  var TIERS = ['pequeno', 'mediano', 'destacado', 'banner', 'premium'];
+  var TIERS = ['pequeno', 'mediano', 'destacado', 'premium'];
 
-  var W = PB.wiz = { step: 1, tier: 'destacado', days: 30, need: false, pieces: 1, promo: false, pal: 0, cats: [], file: null, fileURL: null, fileDims: null, file2: null, busy: false, acct: 'up', pending: false };
+  var W = PB.wiz = { step: 1, tier: 'destacado', days: 30, need: false, pieces: 1, promo: false, pal: 0, cats: [], file: null, fileURL: null, fileDims: null, file2: null, fileTop: null, fileTopURL: null, fileTopDims: null, busy: false, acct: 'up', pending: false };
   function designOnly() { return W.tier === ''; }
   function wantsDesign() { return W.need || designOnly(); }
   function effFile() { return wantsDesign() ? W.file2 : W.file; }
@@ -74,6 +74,7 @@
     if (step === 3) {
       if (wantsDesign()) { if (v.brief.length < 10) return bad(3, 'Cuéntanos qué necesitas para el diseño (mínimo 10 letras).', 'f-brief'); }
       else if (!only && !W.file) return bad(3, 'Sube tu imagen, o elige "Necesito un diseño".', 'f-file');
+      if (!only && C.hasTop(W.tier) && !wantsDesign() && !W.fileTop) return bad(3, 'Sube también la imagen del banner de arriba (1600 × 320 px), o elige "Necesito un diseño".', 'f-file-top');
     }
     if (step === 4 && W.tier && PB.capLeft(W.tier) === 0) return bad(4, 'Ese espacio no tiene cupos. Elige otro.', null);
     if (step === 5 && !$('x-terms').checked) return bad(5, 'Acepta las condiciones para continuar.', 'x-terms');
@@ -141,7 +142,7 @@
     $('pvWrap').hidden = designOnly();
     if (designOnly()) return;
     var ad = previewAd();
-    if (ad.tier === 'premium' || ad.tier === 'banner') { var t = el('div', 'tile'); t.appendChild(PB.poster(ad, {})); box.appendChild(t); }
+    if (false) { var t = el('div', 'tile'); t.appendChild(PB.poster(ad, {})); box.appendChild(t); }
     else { var card = PB.bizCard(ad); card.removeAttribute('href'); card.tabIndex = -1; card.style.pointerEvents = 'none'; box.appendChild(card); }
   }
   function renderSum() {
@@ -171,7 +172,7 @@
       row('Categorías', W.cats.join(', '));
     }
     row('Contacto', [v.wa && 'WhatsApp ' + v.wa, v.phone && 'Tel ' + v.phone, v.mail, v.web].filter(Boolean).join(' · '));
-    row('Diseño', wantsDesign() ? 'Lo creamos nosotros (' + t.pieces + (t.pieces === 1 ? ' pieza' : ' piezas') + ')' : (W.file ? 'Tu imagen: ' + W.file.name : 'Sin imagen (tarjeta de color)'));
+    row('Diseño', wantsDesign() ? 'Lo creamos nosotros (' + t.pieces + (t.pieces === 1 ? ' pieza' : ' piezas') + ')' : (W.file ? 'Tu imagen: ' + W.file.name + (C.hasTop(W.tier) && W.fileTop ? ' · Banner de arriba: ' + W.fileTop.name : '') : 'Sin imagen (tarjeta de color)'));
     if (W.tier) row('Espacio', C.tiers[W.tier].label + ' · ' + C.durLabel(W.days));
     row('Total', t.total === 0 ? 'Gratis' : PB.money(t.total));
   }
@@ -198,9 +199,20 @@
     $('optNeed').disabled = false;
     $('needNote').textContent = 'Nuestro equipo lo crea: ' + PB.money(c.designPrice) + ' una pieza, ' + PB.money(C.designCost(3, c.designPrice)) + ' tres, ' + PB.money(C.designCost(5, c.designPrice)) + ' cinco. Podrás pedir ajustes.';
     $('grpOwn').hidden = need;
+    var dest = C.hasTop(W.tier);
+    $('destNote').hidden = !dest; $('grpTop').hidden = !dest || need;
+    var tp = C.topSize;
+    $('topHint').textContent = 'JPG, PNG o WebP. Medida ideal: ' + tp.w + ' × ' + tp.h + ' px (muy ancha). Se muestra de lado a lado arriba de todas las páginas.';
+    var swt = $('sizeWarnTop'), fdt = W.fileTopDims;
+    if (dest && !need && fdt && Math.abs(fdt.w / fdt.h - tp.w / tp.h) / (tp.w / tp.h) > 0.06) {
+      swt.hidden = false; swt.textContent = 'Tu imagen mide ' + fdt.w + ' × ' + fdt.h + ' px. Se recortará a ' + tp.w + ' × ' + tp.h + ' px. Súbela con esa medida para que no se corte.';
+    } else swt.hidden = true;
+    $('pickedTop').hidden = !W.fileTop;
+    if (W.fileTop) $('pickedTopName').textContent = W.fileTop.name + ' · ' + (W.fileTop.size / 1048576).toFixed(1) + ' MB';
     $('designMore').hidden = !need;
     var pc = $('pieces'); pc.textContent = '';
-    for (var i = 1; i <= C.design.maxPieces; i++) (function (n) {
+    var minP = dest ? 2 : 1; if (need && W.pieces < minP) W.pieces = minP;
+    for (var i = minP; i <= C.design.maxPieces; i++) (function (n) {
       var b = el('button', 'chip', n + (n === 1 ? ' pieza' : ' piezas')); b.type = 'button';
       b.setAttribute('aria-pressed', W.pieces === n ? 'true' : 'false');
       b.addEventListener('click', function () { W.pieces = n; PB.renderWizard(); });
@@ -241,8 +253,13 @@
     W.file = null; W.fileURL = null; W.fileDims = null; $('f-file').value = '';
     PB.renderWizard();
   }
+  function clearTop() {
+    if (W.fileTopURL) URL.revokeObjectURL(W.fileTopURL);
+    W.fileTop = null; W.fileTopURL = null; W.fileTopDims = null; $('f-file-top').value = '';
+    PB.renderWizard();
+  }
   function resetAll() {
-    clearFile();
+    clearFile(); clearTop();
     $('form').reset();
     ['c-brand:40', 'c-head:60', 'c-body:300', 'c-offer:16', 'c-hours:70', 'c-barrio:60', 'c-addr:100', 'c-brief:400'].forEach(function (s) { var p = s.split(':'); $(p[0]).textContent = '0/' + p[1]; });
     W.step = 1; W.need = false; W.cats = []; W.promo = false; W.file2 = null; W.pieces = 1;
@@ -283,7 +300,7 @@
         cats: only ? [] : W.cats.slice(), categoria: only ? '' : W.cats[0], localidad: only ? '' : v.loc,
         barrio: v.barrio, address: v.addr,
         whatsapp: PB.normPhone(v.wa) || '', phone: PB.normPhone(v.phone) || '', mail: PB.normMail(v.mail) || '', web: PB.normWeb(v.web) || '',
-        pal: W.pal, file: file
+        pal: W.pal, file: file, fileTop: (C.hasTop(W.tier) && !design) ? W.fileTop : null
       }, function (p) { $('progFill').style.width = p + '%'; });
       PB.setMsg(msg, '', '');
       clearDraft(); W.pending = false;
@@ -381,6 +398,17 @@
       W.file2 = f || null; PB.setMsg($('msg'), '', '');
     });
     $('clearFile').addEventListener('click', clearFile);
+    $('clearTop').addEventListener('click', clearTop);
+    $('f-file-top').addEventListener('change', function (e) {
+      var f = e.target.files && e.target.files[0];
+      if (!f) { W.fileTop = null; PB.renderWizard(); return; }
+      if (!checkFile(f, $('msg'))) { e.target.value = ''; W.fileTop = null; return; }
+      PB.setMsg($('msg'), '', '');
+      if (W.fileTopURL) URL.revokeObjectURL(W.fileTopURL);
+      W.fileTop = f; W.fileTopURL = URL.createObjectURL(f); W.fileTopDims = null;
+      (function (url) { var im = new Image(); im.onload = function () { if (W.fileTopURL === url) { W.fileTopDims = { w: im.naturalWidth, h: im.naturalHeight }; PB.renderWizard(); } }; im.src = url; })(W.fileTopURL);
+      PB.renderWizard();
+    });
     $('wNext').addEventListener('click', function () { if (validate(W.step)) goStep(W.step + 1); });
     $('wBack').addEventListener('click', function () { PB.setMsg($('msg'), '', ''); goStep(Math.max(1, W.step - 1)); });
     $('form').addEventListener('submit', function (e) { e.preventDefault(); if (W.step < 5) { if (validate(W.step)) goStep(W.step + 1); return; } submit(); });

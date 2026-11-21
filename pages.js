@@ -35,45 +35,59 @@
     var box = $('plusBox');
     if (state.pTimer) { clearInterval(state.pTimer); state.pTimer = null; }
     box.textContent = '';
-    var list = state.ads.filter(function (a) { return a.tier === 'premium' && PB.visible(a); }).sort(PB.byRank);
+    // Franja de arriba: Plus + anuncios Destacados que tienen imagen de banner. El Plus se intercala para verse más veces.
+    var withTop = state.ads.filter(function (a) { return C.hasTop(a.tier) && PB.visible(a) && PB.safeMedia(a.media2); }).sort(PB.byRank);
+    var plus = withTop.filter(function (a) { return a.tier === 'premium'; }), dest = withTop.filter(function (a) { return a.tier !== 'premium'; });
+    var list = plus.slice(), pi = 0;
+    dest.forEach(function (d) { list.push(d); if (plus.length) list.push(plus[pi++ % plus.length]); }); // el Plus se ve más veces
     var show = list.length && ['admin', 'pago', 'anunciar', 'entrar', 'contrato', 'informe'].indexOf(state.view) < 0;
     box.hidden = !show;
     if (!show) return;
     if (state.pIdx >= list.length) state.pIdx = 0;
-    box.appendChild(PB.poster(list[state.pIdx], { click: true }));
-    if (list.length > 1 && !PB.reduce) state.pTimer = setInterval(function () { state.pIdx = (state.pIdx + 1) % list.length; PB.renderPlus(); }, 8000);
+    box.appendChild(PB.topBanner(list[state.pIdx]));
+    if (list.length > 1 && !PB.reduce) state.pTimer = setInterval(function () { state.pIdx = (state.pIdx + 1) % list.length; PB.renderPlus(); }, 7000);
   };
-  function renderBanner(banners) {
-    var box = $('bannerBox');
-    if (state.bTimer) { clearInterval(state.bTimer); state.bTimer = null; }
-    box.textContent = '';
-    box.hidden = !banners.length;
-    if (!banners.length) return;
-    if (state.bIdx >= banners.length) state.bIdx = 0;
-    box.appendChild(PB.tile(banners[state.bIdx], { click: true }));
-    if (banners.length > 1) {
-      var nav = el('div', 'banner-nav');
-      banners.forEach(function (b, i) {
-        var d = el('button', 'dot'); d.type = 'button';
-        d.setAttribute('aria-label', 'Banner ' + (i + 1) + ' de ' + banners.length);
-        d.setAttribute('aria-current', i === state.bIdx ? 'true' : 'false');
-        d.addEventListener('click', function () { state.bIdx = i; renderBanner(banners); });
-        nav.appendChild(d);
-      });
-      box.appendChild(nav);
-      if (!PB.reduce) state.bTimer = setInterval(function () { state.bIdx = (state.bIdx + 1) % banners.length; renderBanner(banners); }, 7000);
-    }
-  }
 
   // ---------- Inicio ----------
-  var TIER_ASC = ['pequeno', 'mediano', 'destacado', 'banner', 'premium'];
+  var TIER_ASC = ['pequeno', 'mediano', 'destacado', 'premium'];
+  // Carrusel de cuadros con negocios/promociones activos, en orden aleatorio por visita (sin ventaja por plan).
+  var vitOrder = {}, vitTimer = null, vitWired = false;
+  function renderVit(vis) {
+    var sec = $('secVit'), tr = $('vitTrack');
+    if (!sec || !tr) return;
+    var list = vis.filter(function (a) { return PB.safeMedia(a.media) || a.headline; });
+    sec.hidden = !list.length;
+    clearInterval(vitTimer);
+    if (!list.length) return;
+    list.forEach(function (a) { if (vitOrder[a.id] == null) vitOrder[a.id] = Math.random(); });
+    list.sort(function (a, b) { return vitOrder[a.id] - vitOrder[b.id]; });
+    var keep = tr.scrollLeft; tr.textContent = '';
+    list.slice(0, 20).forEach(function (a) {
+      var l = el('a', 'vit-card'); l.href = '#anuncio-' + a.id;
+      var im = el('div', 'vit-img'); im.appendChild(PB.imageBlock(a, false)); l.appendChild(im);
+      var cap = el('div', 'vit-cap'); cap.appendChild(el('b', '', PB.clip(a.brand || a.headline, 28)));
+      if (a.offer) cap.appendChild(el('span', 'pill y', PB.clip(a.offer, 16)));
+      l.appendChild(cap); tr.appendChild(l);
+    });
+    tr.scrollLeft = keep;
+    function step(dir) {
+      var w = (tr.firstChild ? tr.firstChild.offsetWidth : 240) + 14;
+      if (dir > 0 && tr.scrollLeft + tr.clientWidth >= tr.scrollWidth - 4) tr.scrollTo({ left: 0, behavior: 'smooth' });
+      else if (dir < 0 && tr.scrollLeft <= 4) tr.scrollTo({ left: tr.scrollWidth, behavior: 'smooth' });
+      else tr.scrollBy({ left: dir * w, behavior: 'smooth' });
+    }
+    if (!vitWired) { vitWired = true; $('vitPrev').addEventListener('click', function () { step(-1); }); $('vitNext').addEventListener('click', function () { step(1); }); }
+    if (!PB.reduce && list.length > 1) vitTimer = setInterval(function () { if (!tr.matches(':hover, :focus-within') && state.view === 'inicio') step(1); }, 4000);
+  }
+
   PB.renderHome = function () {
     var vis = visibleAds();
     var ready = state.status === 'ok';
     var hc = $('heroCount');
     hc.hidden = !ready;
     if (ready) { hc.textContent = ''; hc.appendChild(el('b', '', String(vis.length))); hc.appendChild(document.createTextNode(vis.length === 1 ? ' negocio activo hoy en la plataforma' : ' negocios activos hoy en la plataforma')); }
-    renderBanner(vis.filter(function (a) { return a.tier === 'banner'; }).sort(PB.byRank));
+
+    renderVit(vis);
 
     // Categorías
     var counts = countBy(PB.adCats);
@@ -90,7 +104,7 @@
     });
 
     // Ofertas destacadas
-    var dest = sortAds(vis.filter(function (a) { return a.tier === 'destacado'; })).slice(0, 6);
+    var dest = sortAds(vis.filter(function (a) { return a.tier === 'destacado' || a.tier === 'premium'; })).slice(0, 6);
     $('secDest').hidden = !dest.length;
     var gd = $('gridDest'); gd.textContent = '';
     dest.forEach(function (a) { gd.appendChild(PB.bizCard(a)); });
@@ -196,9 +210,8 @@
   var FEATURES = {
     pequeno: ['Ficha con contacto y WhatsApp', 'Aparece en búsquedas y filtros', 'Estadísticas de visitas y clics'],
     mediano: ['Todo lo del espacio pequeño', 'Foto grande en el directorio', 'Hasta 3 categorías'],
-    destacado: ['Todo lo del espacio mediano', 'Prioridad en los resultados', 'En las ofertas destacadas de la portada', 'Sello amarillo de oferta'],
-    banner: ['Valla grande en la portada', 'Rota con otros banners', 'Ficha completa de tu negocio'],
-    premium: ['Franja visible en todas las páginas', 'Se ve aunque el cliente filtre', 'Un solo cupo: la máxima visibilidad']
+    destacado: ['Todo lo del espacio mediano', 'Banner de lado a lado arriba de todas las páginas', 'Tarjeta en las ofertas destacadas de la portada', 'Prioridad en los resultados y sello amarillo'],
+    premium: ['Banner de lado a lado arriba de todas las páginas', 'Rota con solo 4 anuncios más (5 cupos)', 'Primero en las ofertas destacadas de la portada', 'Todo lo del plan Destacado']
   };
   var planDays = 30;
   PB.renderPlanes = function () {

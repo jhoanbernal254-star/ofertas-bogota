@@ -37,7 +37,7 @@
 
     var grid = el('div', 'pop-grid');
     var p1 = el('p', 'pop-price'); if (launch) { p1.appendChild(el('s', '', 'Desde ' + PB.money(cfg.prices.pequeno))); p1.appendChild(el('b', '', ' $0 por lanzamiento')); } else p1.appendChild(el('b', '', 'Desde ' + PB.money(cfg.prices.pequeno)));
-    grid.appendChild(block('megaphone', 'Publicidad', p1, ['Aparece por localidad, barrio y categoría', 'Ficha con WhatsApp, horario y mapa', 'Espacios pequeños, destacados y banners'], 'Publicar mi negocio', function () { goTo('#anunciar'); }));
+    grid.appendChild(block('megaphone', 'Publicidad', p1, ['Aparece por localidad, barrio y categoría', 'Ficha con WhatsApp, horario y mapa', 'Espacios pequeños, destacados y Banner Plus'], 'Publicar mi negocio', function () { goTo('#anunciar'); }));
     var p2 = el('p', 'pop-price'); p2.appendChild(el('b', '', 'Desde ' + PB.money(cfg.designPrice)));
     grid.appendChild(block('tag', 'Diseño publicitario', p2, ['Imágenes y banners para tu anuncio', 'Publicaciones para Instagram y Facebook', 'Paquetes de 3 y 5 imágenes'], 'Ver diseño', function () { goTo('#planes', 'diseno'); }));
     var p3 = el('p', 'pop-price'); p3.appendChild(el('b', '', 'Desde ' + PB.money(C.services.web[0].from)));

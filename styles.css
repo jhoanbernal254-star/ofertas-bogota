@@ -123,7 +123,13 @@ h1, h2, h3, h4 { font-family: var(--font-h); margin: 0; letter-spacing: -0.02em;
 }
 
 /* Banner Plus (valla visible en todas las páginas) */
-.plus-box { max-width: 1200px; margin: 14px auto 0; padding: 0 clamp(16px, 4vw, 32px); }
+.plus-box { max-width: none; margin: 0; padding: 0; width: 100%; }
+/* Franja de arriba: de lado a lado de la pantalla, sin bordes redondeados */
+.plus-box .poster { border-radius: 0; aspect-ratio: 1600 / 320; min-height: 0; max-height: 300px; }
+.plus-box .poster:not(.hasmedia) { min-height: 96px; }
+.plus-box .pmedia, .plus-box .pmedia img { width: 100%; height: 100%; object-fit: cover; }
+.topbn { display: block; width: 100%; padding: 0; border: 0; background: #0F1B3F; cursor: pointer; aspect-ratio: 1600 / 320; max-height: 300px; overflow: hidden; }
+.topbn img { display: block; width: 100%; height: 100%; object-fit: cover; }
 
 /* Inicio: hero */
 .hero {
@@ -500,9 +506,7 @@ select { appearance: none; -webkit-appearance: none; background-image: url("data
 /* Anuncios tipo valla (Plus y banner): imagen sola o tarjeta de color */
 .poster { position: relative; container-type: inline-size; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; width: 100%; background: var(--pbg, #1F3FFF); color: var(--pfg, #fff); border: 0; padding: clamp(14px, 3cqw, 32px); text-align: left; border-radius: 18px; }
 .poster.click { cursor: pointer; }
-.poster.s-premium { aspect-ratio: 1600 / 320; min-height: 110px; }
-.poster.s-banner { aspect-ratio: 1600 / 500; min-height: 170px; }
-.poster.s-destacado, .poster.s-mediano, .poster.s-pequeno { aspect-ratio: 4 / 3; }
+.poster.s-premium, .poster.s-destacado, .poster.s-mediano, .poster.s-pequeno { aspect-ratio: 4 / 3; }
 .poster.hasmedia { padding: 0; }
 .poster.imgonly { min-height: 0 !important; }
 .pmedia { position: absolute; inset: 0; }
@@ -513,7 +517,6 @@ select { appearance: none; -webkit-appearance: none; background-image: url("data
 .phead { font-size: clamp(20px, 5cqw, 52px); font-weight: 800; line-height: 1.02; margin: 0; letter-spacing: -0.03em; }
 .pbody { margin: 8px 0 0; font-size: clamp(13px, 1.9cqw, 18px); max-width: 38em; opacity: .92; }
 .ploc { margin: 0; font-size: clamp(11px, 1.6cqw, 14px); opacity: .85; }
-.s-premium .pbody, .s-premium .ploc { display: none; }
 .ph .pmedia { position: static; }
 .tile { border-radius: 18px; overflow: hidden; }
 
@@ -686,3 +689,26 @@ dialog::backdrop { background: rgba(8, 14, 42, 0.6); }
 .how-mini{margin:.4rem 0 .5rem;padding-left:1.2rem;display:grid;gap:.15rem;font-size:.92rem}
 .acct{border:1.5px solid #dfe3ee;border-radius:14px;padding:1rem;margin:1rem 0;background:#fff;display:grid;gap:.6rem}
 .acct .h3{margin:0}
+.dest-note{background:#FFF8DB;border:1.5px solid #FFD21F;border-radius:12px;padding:.7rem .9rem;margin:0 0 1rem;font-size:.92rem}
+#grpTop{margin:1rem 0}
+#grpTop .lbl{display:block;font-weight:700;margin:0 0 .4rem}
+
+
+.thumbs { display: flex; flex-wrap: wrap; gap: 10px; margin: 8px 0; }
+.thumb { margin: 0; max-width: 220px; }
+.thumbbtn { display: block; padding: 0; border: 2px solid #ccc; border-radius: 8px; background: #fff; cursor: zoom-in; overflow: hidden; }
+.thumbbtn img { display: block; max-width: 220px; max-height: 140px; width: auto; height: auto; }
+.thumb figcaption { font-size: .75rem; color: #555; margin-top: 3px; }
+.lbox { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,.88); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 16px; cursor: zoom-out; }
+.lbox img { max-width: 96vw; max-height: 82vh; object-fit: contain; background: #fff; border-radius: 6px; }
+.arch-box > summary { cursor: pointer; font-weight: 700; padding: 8px 0; }
+
+.vit-nav { display: flex; gap: 8px; }
+.vit-track { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 4px 2px 12px; scrollbar-width: thin; }
+.vit-card { position: relative; flex: 0 0 clamp(190px, 24vw, 260px); aspect-ratio: 1 / 1; scroll-snap-align: start; border-radius: 16px; overflow: hidden; background: #eee; text-decoration: none; color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+.vit-img, .vit-img > * { position: absolute; inset: 0; width: 100%; height: 100%; }
+.vit-img img, .vit-img video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.vit-cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 26px 10px 10px; background: linear-gradient(transparent, rgba(0,0,0,.75)); display: flex; justify-content: space-between; align-items: flex-end; gap: 6px; }
+.vit-cap b { font-size: .95rem; }
+.vit-cap { flex-direction: column; align-items: flex-start; justify-content: flex-end; gap: 4px; }
+.vit-cap .pill { position: static; order: -1; }

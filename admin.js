@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var PB = window.PB, C = PB.C, $ = PB.$, el = PB.el, state = PB.state, B = PB.B;
-  var adFilter = 'todos', orderFilter = 'todos', cfgFilled = false, editing = null, editFile = null, editCats = [];
+  var adFilter = 'todos', orderFilter = 'todos', cfgFilled = false, editing = null, editFile = null, editFileTop = null, editCats = [];
   PB.resetAdminCfg = function () { cfgFilled = false; };
 
   function newRepCount() { return (state.reports || []).filter(function (r) { return r.status === 'nuevo'; }).length; }
@@ -10,6 +10,19 @@
     var m = $('admMsg');
     try { var r = await fn(); PB.setMsg(m, typeof okText === 'function' ? okText(r) : okText, 'ok'); }
     catch (err) { PB.setMsg(m, PB.errText(err), 'err'); }
+  }
+
+  function adArch(a) { return a.archived === true || (a.active !== true && !!a.startsAt); }
+  function ordArch(o) { return o.archived === true || o.status === 'rechazado'; }
+  function archBtn(kind, rec, val, label) {
+    var b = el('button', 'btn sm ghost', label); b.type = 'button';
+    b.addEventListener('click', function () {
+      adminDo(async function () {
+        if (!val && kind === 'ad' && rec.active !== true) await B.setAdActive(rec.id, true, rec);
+        if (val || rec.archived === true) await B.setArchived(kind, rec.id, val);
+      }, val ? 'Archivado.' : 'Restaurado.');
+    });
+    return b;
   }
 
   PB.renderAdmin = function () {
@@ -104,14 +117,14 @@
 
     // Anuncios
     var af = $('adFilters'); af.textContent = '';
-    [['todos', 'Todos'], ['activo', 'Activos'], ['porvencer', 'Por vencer'], ['vencido', 'Vencidos'], ['borrador', 'Borradores'], ['pausado', 'Pausados']].forEach(function (x) {
+    [['todos', 'Todos'], ['activo', 'Activos'], ['porvencer', 'Por vencer'], ['vencido', 'Vencidos'], ['borrador', 'Borradores']].forEach(function (x) {
       var b = el('button', 'chip', x[1]); b.type = 'button'; b.setAttribute('aria-pressed', adFilter === x[0] ? 'true' : 'false');
       b.addEventListener('click', function () { adFilter = x[0]; PB.renderAdmin(); }); af.appendChild(b);
     });
     var al = $('adList'); al.textContent = '';
-    var shownAds = ads.filter(function (a) { return adFilter === 'todos' || PB.adStatus(a).k === adFilter; }).sort(function (a, b) { return (a.endsAt || 9e15) - (b.endsAt || 9e15); });
+    var shownAds = ads.filter(function (a) { return !adArch(a); }).filter(function (a) { return adFilter === 'todos' || PB.adStatus(a).k === adFilter; }).sort(function (a, b) { return (a.endsAt || 9e15) - (b.endsAt || 9e15); });
     if (!shownAds.length) al.appendChild(el('p', 'fine', 'No hay anuncios en esta vista.'));
-    shownAds.forEach(function (ad) {
+    function adCard(ad, archived) {
       var s = PB.adStatus(ad), c = el('div', 'card'), top = el('div', 'crow');
       top.appendChild(el('h3', '', PB.clip(ad.brand, 30) + ' · ' + PB.tierLabel(ad.tier)));
       top.appendChild(el('span', 'chipst st-' + s.k, s.t)); c.appendChild(top);
@@ -132,19 +145,42 @@
         rm.href = PB.waLink(num, 'Hola, tu anuncio "' + PB.clip(ad.headline || ad.brand, 48) + '" en ' + C.brand + (s.k === 'vencido' ? ' ya venció.' : ' vence el ' + PB.fmtDate(ad.endsAt) + '.') + ' ¿Quieres renovarlo?');
         rm.target = '_blank'; rm.rel = 'noopener noreferrer'; acts.appendChild(rm);
       }
-      c.appendChild(acts); al.appendChild(c);
-    });
+      acts.appendChild(archived ? archBtn('ad', ad, false, 'Restaurar') : archBtn('ad', ad, true, 'Archivar'));
+      var th = PB.thumbs(ad, 'Imagen del anuncio', 'Banner superior'); if (th) c.appendChild(th);
+      c.appendChild(acts); return c;
+    }
+    shownAds.forEach(function (ad) { al.appendChild(adCard(ad, false)); });
 
     // Pedidos
     var fl = $('orderFilters'); fl.textContent = '';
-    [['todos', 'Todos'], ['revision', 'Por revisar'], ['por_pagar', 'Por pagar'], ['pago_reportado', 'Pago avisado'], ['aprobado', 'Publicados'], ['rechazado', 'Rechazados']].forEach(function (x) {
+    [['todos', 'Todos'], ['revision', 'Por revisar'], ['por_pagar', 'Por pagar'], ['pago_reportado', 'Pago avisado'], ['aprobado', 'Publicados']].forEach(function (x) {
       var b = el('button', 'chip', x[1]); b.type = 'button'; b.setAttribute('aria-pressed', orderFilter === x[0] ? 'true' : 'false');
       b.addEventListener('click', function () { orderFilter = x[0]; PB.renderAdmin(); }); fl.appendChild(b);
     });
     var ol = $('orderList'); ol.textContent = '';
-    var shown = orders.filter(function (o) { return orderFilter === 'todos' || o.status === orderFilter; });
+    var shown = orders.filter(function (o) { return !ordArch(o); }).filter(function (o) { return orderFilter === 'todos' || o.status === orderFilter; });
     if (!shown.length) ol.appendChild(el('p', 'fine', 'No hay pedidos en esta vista.'));
-    shown.forEach(function (o) { ol.appendChild(PB.simpleOrder(o, true)); });
+    function ordCard(o, archived) {
+      var c = PB.simpleOrder(o, true);
+      if (o.rejectReason) c.appendChild(el('p', 'meta', 'Motivo: ' + PB.clip(o.rejectReason, 200)));
+      if (archived ? o.archived === true : o.status === 'aprobado') {
+        var a = el('div', 'acts'); a.appendChild(archived ? archBtn('order', o, false, 'Restaurar') : archBtn('order', o, true, 'Archivar')); c.appendChild(a);
+      }
+      return c;
+    }
+    shown.forEach(function (o) { ol.appendChild(ordCard(o, false)); });
+
+    // Archivo
+    var aa = ads.filter(adArch), ao = orders.filter(ordArch);
+    $('archSum').textContent = 'Archivo (' + (aa.length + ao.length) + ')';
+    var arA = $('archAds'), arO = $('archOrders'); arA.textContent = ''; arO.textContent = '';
+    if (!aa.length) arA.appendChild(el('p', 'fine', 'Nada archivado.'));
+    aa.forEach(function (ad) {
+      var c = adCard(ad, true);
+      arA.appendChild(c);
+    });
+    if (!ao.length) arO.appendChild(el('p', 'fine', 'Nada archivado.'));
+    ao.forEach(function (o) { arO.appendChild(ordCard(o, true)); });
 
     renderDb();
     if (!cfgFilled) { cfgFilled = true; fillConfig(); }
@@ -193,9 +229,9 @@
 
   function fillConfig() {
     var c = PB.cfg();
-    $('a-premium').value = c.prices.premium; $('a-banner').value = c.prices.banner; $('a-destacado').value = c.prices.destacado;
+    $('a-premium').value = c.prices.premium; $('a-destacado').value = c.prices.destacado;
     $('a-mediano').value = c.prices.mediano; $('a-pequeno').value = c.prices.pequeno; $('a-design').value = c.designPrice;
-    $('a-capp').value = c.caps.premium; $('a-capb').value = c.caps.banner; $('a-capd').value = c.caps.destacado;
+    $('a-capp').value = c.caps.premium; $('a-capd').value = c.caps.destacado;
     $('a-lenabled').checked = c.launch.enabled; $('a-luntil').value = c.launch.until || '';
   }
 
@@ -212,7 +248,8 @@
     });
   }
   function openEditor(ad) {
-    editing = ad || null; editFile = null; $('ed-file').value = '';
+    editing = ad || null; editFile = null; editFileTop = null; $('ed-file').value = ''; $('ed-file-top').value = '';
+    $('edTopNow').textContent = ad && ad.media2 ? 'Ya tiene imagen de banner. Sube otra solo si quieres reemplazarla.' : '';
     $('edTitle').textContent = ad ? 'Editar anuncio' : 'Crear anuncio';
     PB.fillLocs($('ed-loc'), 'Elige…');
     PB.fillSelect($('ed-tier'), 'Elige…', PB.TIER_ORDER.map(function (t) { return [t, C.tiers[t].label]; }));
@@ -233,19 +270,24 @@
   PB.initAdmin = function () {
     $('saveCfg').addEventListener('click', function () {
       var n = function (id) { return Math.round(Number($(id).value)); };
-      var prices = { premium: n('a-premium'), banner: n('a-banner'), destacado: n('a-destacado'), mediano: n('a-mediano'), pequeno: n('a-pequeno') };
-      var design = n('a-design'), capb = n('a-capb'), capd = n('a-capd'), capp = n('a-capp');
+      var prices = { premium: n('a-premium'), destacado: n('a-destacado'), mediano: n('a-mediano'), pequeno: n('a-pequeno') };
+      var design = n('a-design'), capd = n('a-capd'), capp = n('a-capp');
       var okPrices = Object.keys(prices).every(function (k) { return prices[k] >= 1500; }) && design >= 1500;
       if (!okPrices) { PB.setMsg($('admMsg'), 'Cada precio debe ser de al menos $1.500.', 'err'); return; }
-      if (!(capb >= 1 && capd >= 1 && capp >= 1)) { PB.setMsg($('admMsg'), 'Revisa los cupos: deben ser números válidos.', 'err'); return; }
+      if (!(capd >= 1 && capp >= 1)) { PB.setMsg($('admMsg'), 'Revisa los cupos: deben ser números válidos.', 'err'); return; }
       adminDo(function () {
-        return B.saveConfig({ prices: prices, designPrice: design, caps: { premium: capp, banner: capb, destacado: capd }, launch: { enabled: $('a-lenabled').checked, until: $('a-luntil').value || '' } });
+        return B.saveConfig({ prices: prices, designPrice: design, caps: { premium: capp, destacado: capd }, launch: { enabled: $('a-lenabled').checked, until: $('a-luntil').value || '' } });
       }, 'Guardado. Los visitantes ya ven los valores nuevos.');
     });
     $('db-q').addEventListener('input', renderDb);
     $('db-csv').addEventListener('click', csv);
     $('newAd').addEventListener('click', function () { openEditor(null); });
     $('edCancel').addEventListener('click', function () { $('dlgEdit').close(); });
+    $('ed-file-top').addEventListener('change', function (e) {
+      var f = e.target.files && e.target.files[0];
+      if (f && !PB.checkFile(f, $('edMsg'))) { e.target.value = ''; editFileTop = null; return; }
+      editFileTop = f || null; PB.setMsg($('edMsg'), '', '');
+    });
     $('ed-file').addEventListener('change', function (e) {
       var f = e.target.files && e.target.files[0];
       if (f && !PB.checkFile(f, $('edMsg'))) { e.target.value = ''; editFile = null; return; }
@@ -274,7 +316,7 @@
           barrio: $('ed-barrio').value.trim(), address: $('ed-addr').value.trim(), whatsapp: wa || '', phone: ph || '', mail: ml || '', web: wb || '',
           tier: $('ed-tier').value || 'pequeno', pal: parseInt($('ed-pal').value, 10) || 0, active: $('ed-active').checked, endsAt: ends,
           startsAt: editing ? editing.startsAt : null, hadEnds: !!(editing && editing.endsAt)
-        }, editFile, function (p) { $('edProgFill').style.width = p + '%'; });
+        }, editFile, function (p) { $('edProgFill').style.width = p + '%'; }, editFileTop);
         $('dlgEdit').close(); PB.setMsg($('admMsg'), 'Anuncio guardado.', 'ok');
       } catch (err) { bad(PB.errText(err)); }
       $('edSave').disabled = false;

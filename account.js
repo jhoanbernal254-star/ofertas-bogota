@@ -34,6 +34,7 @@
     c.appendChild(el('p', 'meta', PB.money(o.amount) + ' · ' + PB.payLabel(o) + ' · ' + PB.fmtDateTime(o.createdAt)));
     if (forAdmin) c.appendChild(el('p', 'meta', 'Cuenta: ' + PB.clip(o.userEmail, 80)));
     if (o.alert) c.appendChild(el('p', 'msg err', 'Aviso: ' + PB.clip(o.alert, 200)));
+    if (forAdmin) { var th = PB.thumbs(o, o.designPieces && !o.tier ? 'Referencia' : 'Imagen del anuncio', 'Banner superior'); if (th) c.appendChild(th); }
     return c;
   };
 

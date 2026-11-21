@@ -9,7 +9,7 @@
   PB.reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   PB.STATUS = { revision: 'En revisión', por_pagar: 'Aceptada: falta pagar', pago_reportado: 'Pago avisado', aprobado: 'Publicado', rechazado: 'No aceptada' };
   PB.OPEN = ['revision', 'por_pagar', 'pago_reportado'];
-  PB.TIER_ORDER = ['premium', 'banner', 'destacado', 'mediano', 'pequeno'];
+  PB.TIER_ORDER = ['premium', 'destacado', 'mediano', 'pequeno'];
 
   PB.state = {
     status: 'loading', authReady: false, user: null,
@@ -50,6 +50,28 @@
   PB.palOf = function (i) { i = parseInt(i, 10); return C.palettes[i >= 0 && i < C.palettes.length ? i : 0]; };
   PB.isAdmin = function () { return !!(PB.state.user && PB.state.user.admin); };
   PB.safeMedia = function (m) { return !!(m && m.url && /^(https:|blob:|data:image\/)/.test(m.url) && (m.type === 'image' || m.type === 'video')); };
+  PB.lightbox = function (url) {
+    var o = PB.el('div', 'lbox'); o.setAttribute('role', 'dialog'); o.setAttribute('aria-label', 'Imagen ampliada');
+    var im = document.createElement('img'); im.src = url; im.alt = 'Imagen ampliada'; o.appendChild(im);
+    var x = PB.el('button', 'btn sm yellow', 'Cerrar'); x.type = 'button'; o.appendChild(x);
+    function close() { if (o.parentNode) o.parentNode.removeChild(o); document.removeEventListener('keydown', esc); }
+    function esc(e) { if (e.key === 'Escape') close(); }
+    o.addEventListener('click', close); document.addEventListener('keydown', esc);
+    document.body.appendChild(o); x.focus();
+  };
+  // Miniaturas de las imágenes de un pedido o anuncio (para que el admin revise que sean apropiadas).
+  PB.thumbs = function (x, l1, l2) {
+    var items = [[x.media, l1], [x.media2, l2]].filter(function (p) { return p[0] && p[0].url && /^(https:|blob:|data:image\/)/.test(p[0].url) && p[0].type !== 'video'; });
+    if (!items.length) return null;
+    var box = PB.el('div', 'thumbs');
+    items.forEach(function (p) {
+      var f = PB.el('figure', 'thumb'), b = PB.el('button', 'thumbbtn'); b.type = 'button'; b.title = 'Ver en grande';
+      var im = document.createElement('img'); im.src = p[0].url; im.alt = p[1]; im.loading = 'lazy'; b.appendChild(im);
+      b.addEventListener('click', function () { PB.lightbox(p[0].url); });
+      f.appendChild(b); f.appendChild(PB.el('figcaption', '', p[1] + ' (clic para ampliar)')); box.appendChild(f);
+    });
+    return box;
+  };
   PB.tierLabel = function (t) { return C.tiers[t] ? C.tiers[t].label : 'Sin espacio'; };
   PB.daysLeft = function (ad) { return Math.ceil((Number(ad.endsAt) - Date.now()) / PB.DAY); };
   PB.visible = function (ad) { return !!ad && ad.active === true && Number(ad.endsAt) > Date.now(); };
@@ -190,6 +212,14 @@
     }
     return box;
   };
+  // Banner de lado a lado (arriba de todas las páginas) de un anuncio Destacado: usa su segunda imagen.
+  PB.topBanner = function (ad) {
+    var b = PB.el('button', 'topbn click'); b.type = 'button';
+    b.setAttribute('aria-label', 'Ver ficha de ' + PB.clip(ad.brand || 'este anuncio', 30));
+    var im = document.createElement('img'); im.src = ad.media2.url; im.alt = ad.brand || ''; b.appendChild(im);
+    b.addEventListener('click', function () { location.hash = '#anuncio-' + ad.id; });
+    return b;
+  };
   PB.locLine = function (ad) {
     var parts = [];
     if (ad.barrio) parts.push(ad.barrio);
@@ -206,7 +236,7 @@
     ph.appendChild(PB.ic(PB.catIcon(PB.adCats(ad)[0])));
     return ph;
   };
-  PB.isFeatured = function (ad) { return ['destacado', 'banner', 'premium'].indexOf(ad.tier) >= 0; };
+  PB.isFeatured = function (ad) { return ['destacado', 'premium'].indexOf(ad.tier) >= 0; };
   PB.bizCard = function (ad) {
     var featured = PB.isFeatured(ad);
     var a = PB.el('a', 'deal' + (featured ? '' : ' plain') + (ad.tier === 'pequeno' ? ' compact' : ''));
@@ -242,7 +272,7 @@
     if (withMedia) { p.appendChild(PB.mediaNode(ad.media, false)); if (!imgOnly) p.appendChild(PB.el('div', 'pshade')); }
     if (!imgOnly) {
       var top = PB.el('div', 'ptop');
-      top.appendChild(PB.el('span', 'ptag', tier === 'premium' ? 'Plus' : tier === 'banner' ? 'Banner' : tier === 'destacado' ? 'Destacado' : 'Anuncio'));
+      top.appendChild(PB.el('span', 'ptag', tier === 'premium' ? 'Plus' : tier === 'destacado' ? 'Destacado' : 'Anuncio'));
       top.appendChild(PB.el('span', 'pbrand', PB.clip(ad.brand, 40)));
       var mid = PB.el('div', 'pmid');
       mid.appendChild(PB.el('h3', 'phead', PB.clip(ad.headline, 60)));

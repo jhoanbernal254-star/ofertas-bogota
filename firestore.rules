@@ -59,7 +59,7 @@ service cloud.firestore {
         && request.resource.data.designPieces is int && request.resource.data.designPieces >= 0 && request.resource.data.designPieces <= 5
         && request.resource.data.keys().hasOnly(['uid', 'userEmail', 'status', 'createdAt', 'tier', 'renewOf', 'designPieces', 'designBrief',
             'usePromo', 'brand', 'headline', 'body', 'legalName', 'docId', 'categoria', 'cats', 'offer', 'hours', 'localidad', 'barrio', 'address', 'whatsapp', 'phone', 'mail', 'web',
-            'pal', 'media', 'amount', 'days'])
+            'pal', 'media', 'media2', 'amount', 'days'])
         && request.resource.data.days in [1, 3, 7, 14, 30]
         && request.resource.data.brand.size() <= 60
         && request.resource.data.headline.size() <= 80
@@ -69,7 +69,8 @@ service cloud.firestore {
         && request.resource.data.get('legalName', '').size() <= 80
         && request.resource.data.get('docId', '').size() <= 20
         && request.resource.data.get('hours', '').size() <= 80
-        && (request.resource.data.media == null || request.resource.data.media.url.size() < 420000);
+        && (request.resource.data.media == null || request.resource.data.media.url.size() < 420000)
+        && (request.resource.data.get('media2', null) == null || request.resource.data.media2.url.size() < 240000);
       // El anunciante solo puede avisar que ya pagó. El administrador puede cambiarlo todo.
       allow update: if isAdmin()
         || (signedIn() && resource.data.uid == request.auth.uid
