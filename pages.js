@@ -50,34 +50,17 @@
 
   // ---------- Inicio ----------
   var TIER_ASC = ['pequeno', 'mediano', 'destacado', 'premium'];
-  // Carrusel de cuadros con negocios/promociones activos, en orden aleatorio por visita (sin ventaja por plan).
-  var vitOrder = {}, vitTimer = null, vitWired = false;
+  // Cuadrícula de negocios en orden aleatorio por visita (todos con la misma opción de salir).
+  var vitOrder = {};
   function renderVit(vis) {
     var sec = $('secVit'), tr = $('vitTrack');
     if (!sec || !tr) return;
-    var list = vis.filter(function (a) { return PB.safeMedia(a.media) || a.headline; });
+    var list = vis.slice();
     sec.hidden = !list.length;
-    clearInterval(vitTimer);
-    if (!list.length) return;
+    tr.textContent = '';
     list.forEach(function (a) { if (vitOrder[a.id] == null) vitOrder[a.id] = Math.random(); });
     list.sort(function (a, b) { return vitOrder[a.id] - vitOrder[b.id]; });
-    var keep = tr.scrollLeft; tr.textContent = '';
-    list.slice(0, 20).forEach(function (a) {
-      var l = el('a', 'vit-card'); l.href = '#anuncio-' + a.id;
-      var im = el('div', 'vit-img'); im.appendChild(PB.imageBlock(a, false)); l.appendChild(im);
-      var cap = el('div', 'vit-cap'); cap.appendChild(el('b', '', PB.clip(a.brand || a.headline, 28)));
-      if (a.offer) cap.appendChild(el('span', 'pill y', PB.clip(a.offer, 16)));
-      l.appendChild(cap); tr.appendChild(l);
-    });
-    tr.scrollLeft = keep;
-    function step(dir) {
-      var w = (tr.firstChild ? tr.firstChild.offsetWidth : 240) + 14;
-      if (dir > 0 && tr.scrollLeft + tr.clientWidth >= tr.scrollWidth - 4) tr.scrollTo({ left: 0, behavior: 'smooth' });
-      else if (dir < 0 && tr.scrollLeft <= 4) tr.scrollTo({ left: tr.scrollWidth, behavior: 'smooth' });
-      else tr.scrollBy({ left: dir * w, behavior: 'smooth' });
-    }
-    if (!vitWired) { vitWired = true; $('vitPrev').addEventListener('click', function () { step(-1); }); $('vitNext').addEventListener('click', function () { step(1); }); }
-    if (!PB.reduce && list.length > 1) vitTimer = setInterval(function () { if (!tr.matches(':hover, :focus-within') && state.view === 'inicio') step(1); }, 4000);
+    list.slice(0, 8).forEach(function (a) { tr.appendChild(PB.bizCard(a)); });
   }
 
   PB.renderHome = function () {
