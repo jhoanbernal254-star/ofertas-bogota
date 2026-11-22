@@ -83,26 +83,65 @@
     try { var res = await B.sendRequest({ renewOf: ad.id, days: days }); PB.setMsg(m, '', ''); state.payOrder = res.orderId; location.hash = '#pago'; }
     catch (err) { PB.setMsg(m, PB.errText(err), 'err'); }
   }
+  function arch(kind, rec, val, label) {
+    var b = el('button', 'btn sm ghost', label); b.type = 'button';
+    b.addEventListener('click', async function () { try { await B.setClientArchived(kind, rec.id, val); } catch (err) { PB.setMsg($('myMsg'), PB.errText(err), 'err'); } });
+    return b;
+  }
+  function patch(n, p, label) {
+    var b = el('button', 'btn sm ghost', label); b.type = 'button';
+    b.addEventListener('click', async function () { try { await B.patchNotice(n.id, p); } catch (err) { PB.setMsg($('myMsg'), PB.errText(err), 'err'); } });
+    return b;
+  }
+  function askChange(ad, kind) {
+    var baja = kind === 'baja';
+    var fields = baja
+      ? [{ id: 'text', label: 'Cuéntanos por qué quieres eliminar tu anuncio', type: 'textarea', max: 500 }]
+      : [{ id: 'text', label: '¿Qué quieres cambiar? (obligatorio)', type: 'textarea', max: 500 },
+         { id: 'offer', label: 'Nueva oferta corta (opcional, ej. -20%)', type: 'text', max: 20 },
+         { id: 'body', label: 'Nuevo texto del anuncio (opcional)', type: 'textarea', max: 300 },
+         { id: 'file', label: 'Nueva imagen (opcional)', type: 'file', hint: 'Primero la revisa el administrador; no se publica sola.' }];
+    PB.modal(baja ? 'Pedir que eliminemos tu anuncio' : 'Pedir un cambio en tu anuncio', 'Le llega al administrador. Cuando la revise te respondemos aquí en tu bandeja.', fields, 'Enviar solicitud', async function (v) {
+      if (!v.text || v.text.length < 5) throw new Error('Cuéntanos qué necesitas (mínimo 5 letras).');
+      await B.sendChange({ adId: ad.id, brand: ad.brand, kind: kind, text: v.text, newOffer: v.offer, newText: v.body }, v.file);
+      PB.setMsg($('myMsg'), 'Solicitud enviada. La revisamos y te respondemos en tu bandeja.', 'ok');
+    });
+  }
   PB.renderCuenta = function () {
-    var la = $('myAds'), lo = $('myList'), ln = $('myNotices');
-    la.textContent = ''; lo.textContent = ''; ln.textContent = '';
-    $('noticeNote').textContent = 'Así se verían los correos que recibe el anunciante. En la demostración no se envía nada: los avisos se guardan aquí.';
-    $('noticeHead').hidden = $('noticeNote').hidden = ln.hidden = !B.watchNotices;
+    var la = $('myAds'), lo = $('myList'), ln = $('myNotices'), lar = $('myArchList');
+    la.textContent = ''; lo.textContent = ''; ln.textContent = ''; lar.textContent = '';
+    $('noticeNote').textContent = 'Aquí te avisamos si aceptamos, rechazamos o desactivamos algo, y la respuesta a tus solicitudes de cambio.';
     if (!state.user) return;
     $('pName').textContent = state.user.name || state.user.email;
     $('pMail').textContent = state.user.name ? state.user.email : '';
-    if (B.watchNotices) {
-      if (!state.notices.length) ln.appendChild(el('p', 'fine', 'Todavía no tienes avisos.'));
-      state.notices.slice(0, 20).forEach(function (n) {
-        var c = el('div', 'card');
-        var top = el('div', 'crow'); top.appendChild(el('h3', '', n.subject)); top.appendChild(el('span', 'meta', PB.fmtDateTime(n.at)));
-        c.appendChild(top); c.appendChild(el('p', 'fine', 'Para: ' + (n.to || '—'))); c.appendChild(el('p', '', n.text));
-        ln.appendChild(c);
-      });
-    }
+
+    // Bandeja
+    var all = state.notices.filter(function (n) { return n.archivedClient !== true; });
+    var unread = all.filter(function (n) { return n.dir !== 'admin' && n.read !== true; });
+    $('noticeHead').textContent = 'Bandeja de notificaciones' + (unread.length ? ' (' + unread.length + ' sin leer)' : '');
+    var ra = $('readAll'); ra.hidden = !unread.length;
+    ra.onclick = async function () { try { for (var i = 0; i < unread.length; i++) await B.patchNotice(unread[i].id, { read: true }); } catch (err) { PB.setMsg($('myMsg'), PB.errText(err), 'err'); } };
+    if (!all.length) ln.appendChild(el('p', 'fine', 'Todavía no tienes notificaciones.'));
+    all.slice(0, 30).forEach(function (n) {
+      var mine = n.dir === 'admin', isNew = !mine && n.read !== true;
+      var c = el('div', 'card' + (isNew ? ' nt-new' : ''));
+      var top = el('div', 'crow'); var h = el('h3', '', n.subject); if (isNew) h.appendChild(el('span', 'nt-badge', 'Nuevo')); top.appendChild(h); top.appendChild(el('span', 'meta', PB.fmtDateTime(n.at)));
+      c.appendChild(top);
+      if (mine) {
+        c.appendChild(el('p', 'meta', 'Enviada por ti · ' + (n.status === 'atendido' ? 'Atendida' : n.status === 'rechazado' ? 'No se pudo' : 'En revisión')));
+        c.appendChild(el('p', '', n.text));
+        if (n.answer) c.appendChild(el('p', 'fine', 'Respuesta: ' + n.answer));
+      } else c.appendChild(el('p', '', n.text));
+      var acts = el('div', 'acts');
+      if (isNew) acts.appendChild(patch(n, { read: true }, 'Marcar leída'));
+      acts.appendChild(patch(n, { archivedClient: true, read: true }, 'Archivar'));
+      c.appendChild(acts); ln.appendChild(c);
+    });
+
     // Pedidos
-    if (!state.orders.length) lo.appendChild(el('p', 'fine', 'Todavía no tienes solicitudes. Cuando publiques tu negocio, aquí sigues cada etapa.'));
-    state.orders.forEach(function (o) {
+    var ords = state.orders.filter(function (o) { return o.clientArchived !== true; }), ordsA = state.orders.filter(function (o) { return o.clientArchived === true; });
+    if (!ords.length) lo.appendChild(el('p', 'fine', 'Todavía no tienes solicitudes. Cuando publiques tu negocio, aquí sigues cada etapa.'));
+    function ordCard(o, archived) {
       var c = el('div', 'ocard');
       var top = el('div', 'crow');
       top.appendChild(el('h3', '', PB.orderTitle(o)));
@@ -110,26 +149,36 @@
       c.appendChild(top);
       c.appendChild(el('p', 'meta', 'Ref. ' + PB.ref(o) + ' · ' + PB.money(o.amount) + ' · ' + PB.payLabel(o)));
       c.appendChild(PB.timeline(o));
-      if (o.status === 'por_pagar' || o.status === 'pago_reportado') c.appendChild(PB.payBox(o, $('myMsg')));
-      if (PB.canContract(o)) { var ca = el('div', 'acts'); ca.appendChild(PB.contractLink(o)); ca.appendChild(el('span', 'meta', 'Contrato ' + C.contractNo(o))); c.appendChild(ca); }
-      lo.appendChild(c);
-    });
+      if (!archived && (o.status === 'por_pagar' || o.status === 'pago_reportado')) c.appendChild(PB.payBox(o, $('myMsg')));
+      var ca = el('div', 'acts');
+      if (PB.canContract(o)) { ca.appendChild(PB.contractLink(o)); ca.appendChild(el('span', 'meta', 'Contrato ' + C.contractNo(o))); }
+      var ad = o.tier && !o.renewOf ? PB.findAd(o.id) : null;
+      var done = o.status === 'rechazado' || (o.status === 'aprobado' && (!o.tier || o.renewOf || !ad || !PB.visible(ad)));
+      if (archived) ca.appendChild(arch('order', o, false, 'Restaurar')); else if (done) ca.appendChild(arch('order', o, true, 'Archivar'));
+      if (ca.childNodes.length) c.appendChild(ca);
+      return c;
+    }
+    ords.forEach(function (o) { lo.appendChild(ordCard(o, false)); });
+
     // Anuncios
-    var mine = state.myAds.filter(function (a) { return a.uid === state.user.uid; });
+    var mineAll = state.myAds.filter(function (a) { return a.uid === state.user.uid; });
+    var mine = mineAll.filter(function (a) { return a.clientArchived !== true; }), mineA = mineAll.filter(function (a) { return a.clientArchived === true; });
     if (!mine.length) la.appendChild(el('p', 'fine', 'Todavía no tienes anuncios publicados.'));
-    mine.forEach(function (ad) {
+    function adCard(ad, archived) {
       var st = PB.adStatus(ad), c = el('div', 'card');
       var top = el('div', 'crow');
       top.appendChild(el('h3', '', PB.clip(ad.brand, 30) + ' · ' + PB.tierLabel(ad.tier)));
       top.appendChild(el('span', 'chipst st-' + st.k, st.t));
       c.appendChild(top);
+      if (ad.active !== true && ad.offReason) c.appendChild(el('p', 'offwhy', 'Desactivado por el administrador. Motivo: ' + ad.offReason));
       c.appendChild(el('p', 'meta', ad.endsAt ? (st.k === 'vencido' ? 'Venció el ' : 'Vence el ') + PB.fmtDate(ad.endsAt) : 'Aún sin fecha: se publica cuando el diseño esté listo.'));
       c.appendChild(PB.statsLine(ad));
       var acts = el('div', 'acts');
       var v = el('a', 'btn sm ghost', 'Ver ficha'); v.href = '#anuncio-' + ad.id; acts.appendChild(v);
       if (ad.startsAt) acts.appendChild(PB.reportLink(ad, 'btn sm navy'));
       var pending = state.orders.some(function (o) { return o.renewOf === ad.id && PB.OPEN.indexOf(o.status) >= 0; });
-      if (ad.endsAt && (st.k === 'porvencer' || st.k === 'vencido') && !pending) {
+      var asked = state.notices.some(function (n) { return n.dir === 'admin' && n.adId === ad.id && n.status === 'nuevo'; });
+      if (!archived && ad.endsAt && (st.k === 'porvencer' || st.k === 'vencido') && !pending) {
         var sel = el('select'); sel.setAttribute('aria-label', 'Duración de la renovación');
         C.durations.forEach(function (d) { var op = el('option', '', d.label + ' · ' + PB.money(C.priceFor(PB.cfg().prices[ad.tier], d.days)) + (C.discPct(d.days) ? ' (-' + C.discPct(d.days) + '%)' : '')); op.value = String(d.days); sel.appendChild(op); });
         sel.value = String(C.termDays);
@@ -138,8 +187,24 @@
         acts.appendChild(sel); acts.appendChild(r);
       }
       if (pending) acts.appendChild(el('span', 'meta', 'Renovación en proceso'));
-      c.appendChild(acts); la.appendChild(c);
-    });
+      if (!archived && ad.startsAt && ad.active === true) {
+        if (asked) acts.appendChild(el('span', 'meta', 'Solicitud enviada: la estamos revisando'));
+        else {
+          var ch = el('button', 'btn sm ghost', 'Pedir un cambio'); ch.type = 'button'; ch.addEventListener('click', function () { askChange(ad, 'cambio'); }); acts.appendChild(ch);
+          var rm = el('button', 'btn sm ghost', 'Pedir eliminar'); rm.type = 'button'; rm.addEventListener('click', function () { askChange(ad, 'baja'); }); acts.appendChild(rm);
+        }
+      }
+      if (archived) acts.appendChild(arch('ad', ad, false, 'Restaurar'));
+      else if (ad.startsAt && ad.active !== true && !pending) acts.appendChild(arch('ad', ad, true, 'Archivar'));
+      c.appendChild(acts); return c;
+    }
+    mine.forEach(function (ad) { la.appendChild(adCard(ad, false)); });
+
+    // Archivo
+    $('myArchSum').textContent = 'Archivo (' + (mineA.length + ordsA.length) + ')';
+    if (!mineA.length && !ordsA.length) lar.appendChild(el('p', 'fine', 'Nada archivado.'));
+    mineA.forEach(function (ad) { lar.appendChild(adCard(ad, true)); });
+    ordsA.forEach(function (o) { lar.appendChild(ordCard(o, true)); });
   };
 
   // ---------- Estado del pedido (después de enviar) ----------

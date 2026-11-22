@@ -30,6 +30,7 @@ service cloud.firestore {
         || (signedIn() && (resource.data.uid == request.auth.uid || isAdmin()));
       allow create, delete: if isAdmin();
       allow update: if isAdmin()
+        || (signedIn() && resource.data.uid == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['clientArchived']))
         || inc('views') || inc('clicksWhatsapp') || inc('clicksPhone') || inc('clicksEmail') || inc('clicksWeb');
     }
 
@@ -45,6 +46,26 @@ service cloud.firestore {
         && request.resource.data.createdAt is number
         && request.resource.data.uid == (signedIn() ? request.auth.uid : '');
       allow read, update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // Avisos y solicitudes de cambio. El administrador avisa a clientes; el cliente solo puede pedir cambios al administrador.
+    match /notices/{id} {
+      allow read: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if isAdmin()
+        || (signedIn() && request.auth.token.email_verified == true
+            && request.resource.data.uid == request.auth.uid
+            && request.resource.data.dir == 'admin'
+            && request.resource.data.kind in ['cambio', 'baja']
+            && request.resource.data.status == 'nuevo'
+            && request.resource.data.keys().hasOnly(['uid', 'userEmail', 'dir', 'kind', 'adId', 'brand', 'subject', 'text', 'newOffer', 'newText', 'media', 'status', 'at', 'read', 'adminRead'])
+            && request.resource.data.text.size() <= 500
+            && request.resource.data.get('newText', '').size() <= 300
+            && request.resource.data.get('newOffer', '').size() <= 20
+            && (request.resource.data.get('media', null) == null || request.resource.data.media.url.size() < 240000));
+      allow update: if isAdmin()
+        || (signedIn() && resource.data.uid == request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'archivedClient']));
       allow delete: if false;
     }
 
@@ -76,7 +97,9 @@ service cloud.firestore {
         || (signedIn() && resource.data.uid == request.auth.uid
             && resource.data.status == 'por_pagar'
             && request.resource.data.status == 'pago_reportado'
-            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'reportedAt']));
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'reportedAt']))
+        || (signedIn() && resource.data.uid == request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['clientArchived']));
       allow delete: if false;
     }
   }

@@ -214,8 +214,10 @@
     await batch.commit();
     return { draft: draft };
   };
-  B.rejectOrder = function (id, reason) {
-    return F.updateDoc(F.doc(db, 'orders', id), { status: 'rechazado', decidedAt: Date.now(), rejectReason: String(reason || '').slice(0, 200) });
+  B.rejectOrder = async function (id, reason, o) {
+    reason = String(reason || '').slice(0, 200);
+    await F.updateDoc(F.doc(db, 'orders', id), { status: 'rechazado', decidedAt: Date.now(), rejectReason: reason });
+    if (o && o.uid) await B.notifyClient(o.uid, 'No pudimos aceptar tu solicitud', 'No aceptamos "' + (o.brand || 'tu solicitud') + '"' + (reason ? ': ' + reason : '.') + ' No se te cobró nada.');
   };
 
   B.saveAd = async function (d, file, onProgress, fileTop) {
@@ -256,11 +258,55 @@
   B.setAdActive = async function (id, on, ad) {
     var now = Date.now();
     var f = { active: !!on };
+    if (on) { f.offReason = null; f.offAt = null; }
     if (on) {
       if (!ad || !ad.startsAt) f.startsAt = now;
       if (!ad || !ad.endsAt) f.endsAt = now + C.termDays * DAY;
     }
     await F.updateDoc(F.doc(db, 'ads', id), f);
+  };
+  B.watchNotices = function (user, cb, err) {
+    var q = user.admin
+      ? F.query(F.collection(db, 'notices'), F.orderBy('at', 'desc'), F.limit(200))
+      : F.query(F.collection(db, 'notices'), F.where('uid', '==', user.uid));
+    return F.onSnapshot(q, function (snap) {
+      var list = snapList(snap); list.sort(function (a, b) { return (b.at || 0) - (a.at || 0); }); cb(list);
+    }, err);
+  };
+  B.notifyClient = function (uid, subject, text, extra) {
+    return F.addDoc(F.collection(db, 'notices'), Object.assign({ uid: uid, dir: 'client', kind: 'info', subject: String(subject).slice(0, 80), text: String(text).slice(0, 500), at: Date.now(), read: false }, extra || {}));
+  };
+  B.sendChange = async function (d, file) {
+    var u = auth.currentUser;
+    if (!u) throw fail('auth/required', 'Inicia sesión para continuar.');
+    var baja = d.kind === 'baja';
+    var n = { uid: u.uid, userEmail: u.email || '', dir: 'admin', kind: baja ? 'baja' : 'cambio', adId: String(d.adId).slice(0, 40), brand: String(d.brand || '').slice(0, 60),
+      subject: (baja ? 'Pide eliminar: ' : 'Pide un cambio: ') + String(d.brand || '').slice(0, 50), text: String(d.text || '').slice(0, 500),
+      newOffer: String(d.newOffer || '').slice(0, 20), newText: String(d.newText || '').slice(0, 300), status: 'nuevo', at: Date.now(), read: true, adminRead: false };
+    if (file) n.media = await prepImage(file, null, null, 220000);
+    await F.addDoc(F.collection(db, 'notices'), n);
+  };
+  B.patchNotice = function (id, patch) { return F.updateDoc(F.doc(db, 'notices', id), patch); };
+  B.deactivateAd = async function (id, reason, ad) {
+    reason = String(reason || '').trim().slice(0, 300);
+    if (reason.length < 5) throw fail('invalid', 'Escribe el motivo (mínimo 5 letras).');
+    await F.updateDoc(F.doc(db, 'ads', id), { active: false, offReason: reason, offAt: Date.now() });
+    if (ad && ad.uid) await B.notifyClient(ad.uid, 'Desactivamos tu anuncio', 'Tu anuncio "' + (ad.brand || '') + '" quedó desactivado. Motivo: ' + reason, { adId: id });
+  };
+  B.answerChange = async function (n, status, comment, apply, ad) {
+    comment = String(comment || '').slice(0, 300);
+    if (apply && ad) {
+      var f = {};
+      if (n.kind === 'baja') { f.active = false; f.offReason = 'Lo pediste tú: ' + (n.text || 'baja del anuncio'); f.offAt = Date.now(); }
+      else { if (n.newOffer) f.offer = n.newOffer; if (n.newText) f.body = n.newText; if (n.media) f.media = n.media; }
+      if (Object.keys(f).length) await F.updateDoc(F.doc(db, 'ads', ad.id), f);
+    }
+    await F.updateDoc(F.doc(db, 'notices', n.id), { status: status, answer: comment, adminRead: true });
+    await B.notifyClient(n.uid, status === 'atendido' ? 'Atendimos tu solicitud' : 'No pudimos hacer el cambio',
+      (n.kind === 'baja' ? 'Eliminar' : 'Cambiar') + ' "' + (n.brand || 'tu anuncio') + '": ' + (status === 'atendido' ? 'listo.' : 'no fue posible.') + (comment ? ' ' + comment : ''));
+  };
+  B.setClientArchived = function (kind, id, val) {
+    return F.updateDoc(F.doc(db, kind === 'ad' ? 'ads' : 'orders', id), { clientArchived: !!val });
   };
   B.setArchived = function (kind, id, val) {
     return F.updateDoc(F.doc(db, kind === 'ad' ? 'ads' : 'orders', id), { archived: !!val });

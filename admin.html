@@ -476,12 +476,18 @@
         <h1 class="h1 dark" id="h-cta">Mis anuncios</h1>
         <p class="lede">Sigue cada etapa: solicitud, revisión, pago, publicación y vencimiento.</p>
         <p class="msg" id="myMsg" role="status" aria-live="polite"></p>
+        <div class="crow"><h2 class="h3" id="noticeHead">Bandeja de notificaciones</h2><button class="btn sm ghost" type="button" id="readAll">Marcar todas como leídas</button></div>
+        <p class="fine" id="noticeNote"></p>
+        <div class="list" id="myNotices"></div>
+        <h2 class="h3">Mis solicitudes</h2>
         <div class="list" id="myList"></div>
         <h2 class="h3">Anuncios publicados</h2>
         <div class="list" id="myAds"></div>
-        <h2 class="h3" id="noticeHead">Avisos</h2>
-        <p class="fine" id="noticeNote"></p>
-        <div class="list" id="myNotices"></div>
+        <details class="arch-box" id="myArch">
+          <summary id="myArchSum">Archivo</summary>
+          <p class="fine">Lo que archivas no sale en las listas de arriba. Puedes restaurarlo cuando quieras.</p>
+          <div class="list" id="myArchList"></div>
+        </details>
       </div>
     </div>
   </section>
@@ -527,6 +533,9 @@
         <div class="stats" id="stats"></div>
         <p class="msg" id="admMsg" role="status" aria-live="polite"></p>
         <div>
+          <div class="crow"><h2 class="h3" id="inboxHead">Bandeja: solicitudes de clientes</h2></div>
+          <p class="fine">Cambios o eliminaciones que piden los clientes. Nada se publica solo: tú decides.</p>
+          <div class="list" id="inboxList"></div>
           <h2 class="h3">Reportes de anuncios</h2>
           <div class="list" id="reportList"></div>
           <h2 class="h3">Informes</h2>
@@ -566,6 +575,8 @@
             <p class="fine">Aquí quedan lo rechazado, lo desactivado y lo que archives. No salen en las listas principales.</p>
             <h3 class="h3">Anuncios archivados</h3>
             <div class="list" id="archAds"></div>
+            <h3 class="h3">Solicitudes de clientes atendidas</h3>
+            <div class="list" id="archInbox"></div>
             <h3 class="h3">Pedidos archivados</h3>
             <div class="list" id="archOrders"></div>
           </details>

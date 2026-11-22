@@ -39,7 +39,7 @@
     var clicks = ads.reduce(function (t, a) { return t + (a.clicksWhatsapp || 0) + (a.clicksPhone || 0) + (a.clicksEmail || 0) + (a.clicksWeb || 0); }, 0);
     var promoUsed = orders.filter(function (o) { return o.promo === true && ['por_pagar', 'pago_reportado', 'aprobado'].indexOf(o.status) >= 0; }).length;
     var st = $('stats'); st.textContent = '';
-    [[review.length, 'Por revisar'], [toPay.length, 'Esperando pago'], [active.length, 'Anuncios activos'], [soon.length, 'Vencen en 7 días'], [money(income), 'Cobrado'], [views, 'Visitas'], [clicks, 'Clics de contacto'], [newRepCount(), 'Reportes nuevos'], [promoUsed, 'Espacios gratis (lanzamiento)']].forEach(function (x) {
+    [[review.length, 'Por revisar'], [(state.notices || []).filter(function (n) { return n.dir === 'admin' && n.status === 'nuevo' && n.archivedAdmin !== true; }).length, 'Cambios pedidos'], [toPay.length, 'Esperando pago'], [active.length, 'Anuncios activos'], [soon.length, 'Vencen en 7 días'], [money(income), 'Cobrado'], [views, 'Visitas'], [clicks, 'Clics de contacto'], [newRepCount(), 'Reportes nuevos'], [promoUsed, 'Espacios gratis (lanzamiento)']].forEach(function (x) {
       var d = el('div', 'stat'); d.appendChild(el('b', '', String(x[0]))); d.appendChild(el('span', '', x[1])); st.appendChild(d);
     });
 
@@ -55,10 +55,37 @@
       if (r.contact) c.appendChild(el('p', 'meta', 'Contacto de quien reporta: ' + PB.clip(r.contact, 60)));
       var ad = PB.findAd(r.adId), acts = el('div', 'acts');
       var vw = el('a', 'btn sm ghost', 'Ver anuncio'); vw.href = '#anuncio-' + r.adId; acts.appendChild(vw);
-      if (ad && ad.active === true) { var off = el('button', 'btn sm danger', 'Retirar anuncio'); off.type = 'button'; off.addEventListener('click', function () { adminDo(async function () { await B.setAdActive(ad.id, false, ad); await B.resolveReport(r.id, 'retirado'); }, 'Anuncio retirado y reporte cerrado.'); }); acts.appendChild(off); }
+      if (ad && ad.active === true) { var off = el('button', 'btn sm danger', 'Retirar anuncio'); off.type = 'button'; off.addEventListener('click', function () { PB.askReason('Retirar "' + PB.clip(ad.brand, 30) + '"', 'El cliente recibirá este motivo.', function (why) { return B.deactivateAd(ad.id, why, ad).then(function () { return B.resolveReport(r.id, 'atendido'); }).then(function () { PB.setMsg($('admMsg'), 'Anuncio retirado y cliente avisado.', 'ok'); }); }); }); acts.appendChild(off); }
       var ds = el('button', 'btn sm ghost', 'Descartar reporte'); ds.type = 'button'; ds.addEventListener('click', function () { adminDo(function () { return B.resolveReport(r.id, 'descartado'); }, 'Reporte descartado.'); }); acts.appendChild(ds);
       c.appendChild(acts); rl2.appendChild(c);
     });
+    // Bandeja: solicitudes de clientes
+    var reqs = (state.notices || []).filter(function (n) { return n.dir === 'admin'; });
+    var reqNew = reqs.filter(function (n) { return n.status === 'nuevo' && n.archivedAdmin !== true; });
+    var reqOld = reqs.filter(function (n) { return !(n.status === 'nuevo' && n.archivedAdmin !== true); });
+    $('inboxHead').textContent = 'Bandeja: solicitudes de clientes' + (reqNew.length ? ' (' + reqNew.length + ')' : '');
+    function reqCard(n, done) {
+      var ad = PB.findAd(n.adId), c = el('div', 'card' + (n.adminRead === false && !done ? ' nt-new' : '')), top = el('div', 'crow');
+      top.appendChild(el('h3', '', n.subject)); top.appendChild(el('span', 'meta', PB.fmtDateTime(n.at))); c.appendChild(top);
+      c.appendChild(el('p', 'meta', 'Cuenta: ' + PB.clip(n.userEmail || '', 80) + (ad ? ' · ' + PB.tierLabel(ad.tier) : ' · el anuncio ya no existe')));
+      c.appendChild(el('p', '', n.text));
+      if (n.newOffer) c.appendChild(el('p', 'fine', 'Nueva oferta: ' + n.newOffer + (ad && ad.offer ? ' (ahora: ' + ad.offer + ')' : '')));
+      if (n.newText) c.appendChild(el('p', 'fine', 'Nuevo texto: ' + n.newText));
+      var th = PB.thumbs({ media: n.media, media2: ad && n.media ? ad.media : null }, 'Imagen nueva propuesta', 'Imagen actual'); if (th) c.appendChild(th);
+      if (done) { c.appendChild(el('p', 'meta', (n.status === 'atendido' ? 'Atendida' : n.status === 'rechazado' ? 'Rechazada' : 'Archivada') + (n.answer ? ' · ' + n.answer : ''))); return c; }
+      var acts = el('div', 'acts');
+      var yes = el('button', 'btn sm yellow', n.kind === 'baja' ? 'Desactivar el anuncio' : 'Aplicar el cambio'); yes.type = 'button'; yes.disabled = !ad;
+      yes.addEventListener('click', function () { PB.modal(yes.textContent, 'Se aplica al anuncio y el cliente recibe tu aviso.', [{ id: 'c', label: 'Comentario para el cliente (opcional)', type: 'text', max: 200 }], 'Confirmar', function (v) { return B.answerChange(n, 'atendido', v.c, true, ad).then(function () { PB.setMsg($('admMsg'), 'Hecho y cliente avisado.', 'ok'); }); }); });
+      var no = el('button', 'btn sm danger', 'Rechazar'); no.type = 'button';
+      no.addEventListener('click', function () { PB.askReason('Rechazar la solicitud', 'El cliente verá tu respuesta.', function (why) { return B.answerChange(n, 'rechazado', why, false, ad).then(function () { PB.setMsg($('admMsg'), 'Solicitud rechazada y cliente avisado.', 'ok'); }); }); });
+      acts.appendChild(yes); acts.appendChild(no);
+      if (ad) { var vw = el('a', 'btn sm ghost', 'Ver ficha'); vw.href = '#anuncio-' + ad.id; acts.appendChild(vw); }
+      c.appendChild(acts); return c;
+    }
+    var il = $('inboxList'); il.textContent = '';
+    if (!reqNew.length) il.appendChild(el('p', 'fine', 'No hay solicitudes de clientes.'));
+    reqNew.forEach(function (n) { il.appendChild(reqCard(n, false)); });
+
     // Por revisar
     var rl = $('reviewList'); rl.textContent = '';
     if (!review.length) rl.appendChild(el('p', 'fine', 'No hay solicitudes esperando revisión.'));
@@ -89,7 +116,7 @@
         });
       });
       var no = el('button', 'btn sm danger', 'Rechazar'); no.type = 'button';
-      no.addEventListener('click', function () { adminDo(function () { return B.rejectOrder(o.id, inp.value.trim()); }, 'Rechazada. No se cobró nada.'); });
+      no.addEventListener('click', function () { adminDo(function () { return B.rejectOrder(o.id, inp.value.trim(), o); }, 'Rechazada. No se cobró nada.'); });
       acts.appendChild(yes); acts.appendChild(no); c.appendChild(acts); rl.appendChild(c);
     });
 
@@ -109,7 +136,7 @@
         });
       });
       var no = el('button', 'btn sm danger', 'Cancelar pedido'); no.type = 'button';
-      no.addEventListener('click', function () { adminDo(function () { return B.rejectOrder(o.id, 'No se completó el pago'); }, 'Pedido cancelado.'); });
+      no.addEventListener('click', function () { adminDo(function () { return B.rejectOrder(o.id, 'No se completó el pago', o); }, 'Pedido cancelado.'); });
       acts.appendChild(okb); acts.appendChild(no);
       if (o.whatsapp) { var wa = el('a', 'btn sm ghost', 'Escribirle por WhatsApp'); wa.href = PB.waLink(PB.waNum(o.whatsapp), 'Hola, sobre tu anuncio en ' + C.brand + ' (referencia ' + PB.ref(o) + ').'); wa.target = '_blank'; wa.rel = 'noopener noreferrer'; acts.appendChild(wa); }
       c.appendChild(acts); pl.appendChild(c);
@@ -134,7 +161,10 @@
       var acts = el('div', 'acts');
       var ed = el('button', 'btn sm navy', 'Editar'); ed.type = 'button'; ed.addEventListener('click', function () { openEditor(ad); }); acts.appendChild(ed);
       var tg = el('button', 'btn sm ghost', ad.active === true ? 'Desactivar' : 'Activar'); tg.type = 'button';
-      tg.addEventListener('click', function () { adminDo(function () { return B.setAdActive(ad.id, ad.active !== true, ad); }, ad.active === true ? 'Anuncio desactivado.' : 'Anuncio activado.'); }); acts.appendChild(tg);
+      tg.addEventListener('click', function () {
+        if (ad.active === true) PB.askReason('Desactivar "' + PB.clip(ad.brand, 30) + '"', 'El cliente recibirá este motivo en su bandeja.', function (why) { return B.deactivateAd(ad.id, why, ad).then(function () { PB.setMsg($('admMsg'), 'Anuncio desactivado y cliente avisado.', 'ok'); }); });
+        else adminDo(function () { return B.setAdActive(ad.id, true, ad); }, 'Anuncio activado.');
+      }); acts.appendChild(tg);
       var rn = el('button', 'btn sm ghost', 'Renovar ' + C.termDays + ' días'); rn.type = 'button';
       rn.addEventListener('click', function () { adminDo(function () { return B.renewAd(ad.id, ad); }, 'Renovado por ' + C.termDays + ' días.'); }); acts.appendChild(rn);
       var vw = el('a', 'btn sm ghost', 'Ver ficha'); vw.href = '#anuncio-' + ad.id; acts.appendChild(vw);
@@ -172,7 +202,8 @@
 
     // Archivo
     var aa = ads.filter(adArch), ao = orders.filter(ordArch);
-    $('archSum').textContent = 'Archivo (' + (aa.length + ao.length) + ')';
+    $('archSum').textContent = 'Archivo (' + (aa.length + ao.length + reqOld.length) + ')';
+    var arI = $('archInbox'); arI.textContent = ''; if (!reqOld.length) arI.appendChild(el('p', 'fine', 'Nada archivado.')); reqOld.forEach(function (n) { arI.appendChild(reqCard(n, true)); });
     var arA = $('archAds'), arO = $('archOrders'); arA.textContent = ''; arO.textContent = '';
     if (!aa.length) arA.appendChild(el('p', 'fine', 'Nada archivado.'));
     aa.forEach(function (ad) {

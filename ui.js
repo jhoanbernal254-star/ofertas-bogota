@@ -50,6 +50,41 @@
   PB.palOf = function (i) { i = parseInt(i, 10); return C.palettes[i >= 0 && i < C.palettes.length ? i : 0]; };
   PB.isAdmin = function () { return !!(PB.state.user && PB.state.user.admin); };
   PB.safeMedia = function (m) { return !!(m && m.url && /^(https:|blob:|data:image\/)/.test(m.url) && (m.type === 'image' || m.type === 'video')); };
+  // Ventana sencilla: título, campos opcionales y botones. fields: [{id,label,type:'text'|'textarea'|'select'|'file',options,max,hint}]
+  PB.modal = function (title, intro, fields, okText, onOk) {
+    var o = PB.el('div', 'lbox modal'); o.setAttribute('role', 'dialog'); o.setAttribute('aria-modal', 'true'); o.setAttribute('aria-label', title);
+    var box = PB.el('div', 'modal-box'); o.appendChild(box);
+    box.appendChild(PB.el('h3', '', title)); if (intro) box.appendChild(PB.el('p', 'fine', intro));
+    var ctl = {};
+    fields.forEach(function (f) {
+      var w = PB.el('div', 'fld'), l = PB.el('label', '', f.label), c;
+      if (f.type === 'textarea') { c = document.createElement('textarea'); c.rows = 3; }
+      else if (f.type === 'select') { c = document.createElement('select'); f.options.forEach(function (op) { var e = PB.el('option', '', op[1]); e.value = op[0]; c.appendChild(e); }); }
+      else { c = document.createElement('input'); c.type = f.type === 'file' ? 'file' : 'text'; if (f.type === 'file') c.accept = 'image/*'; }
+      if (f.max) c.maxLength = f.max; c.id = 'mf-' + f.id; l.htmlFor = c.id; w.appendChild(l); w.appendChild(c);
+      if (f.hint) w.appendChild(PB.el('span', 'fine', f.hint));
+      box.appendChild(w); ctl[f.id] = c;
+    });
+    var msg = PB.el('p', 'msg', ''); box.appendChild(msg);
+    var acts = PB.el('div', 'acts'), ok = PB.el('button', 'btn sm yellow', okText), no = PB.el('button', 'btn sm ghost', 'Cancelar');
+    ok.type = 'button'; no.type = 'button'; acts.appendChild(ok); acts.appendChild(no); box.appendChild(acts);
+    function close() { if (o.parentNode) o.parentNode.removeChild(o); document.removeEventListener('keydown', esc); }
+    function esc(e) { if (e.key === 'Escape') close(); }
+    document.addEventListener('keydown', esc); no.addEventListener('click', close);
+    box.addEventListener('click', function (e) { e.stopPropagation(); }); o.addEventListener('click', close);
+    ok.addEventListener('click', async function () {
+      ok.disabled = true;
+      try { var vals = {}; Object.keys(ctl).forEach(function (k) { vals[k] = ctl[k].type === 'file' ? (ctl[k].files && ctl[k].files[0]) || null : ctl[k].value.trim(); }); await onOk(vals); close(); }
+      catch (err) { msg.className = 'msg err'; msg.textContent = PB.errText(err); ok.disabled = false; }
+    });
+    document.body.appendChild(o); var first = box.querySelector('textarea,input,select'); if (first) first.focus();
+  };
+  PB.askReason = function (title, intro, onOk) {
+    PB.modal(title, intro, [{ id: 'why', label: 'Motivo (obligatorio, lo verá el cliente)', type: 'textarea', max: 300 }], 'Confirmar', async function (v) {
+      if (v.why.length < 5) throw new Error('Escribe el motivo (mínimo 5 letras).');
+      await onOk(v.why);
+    });
+  };
   PB.lightbox = function (url) {
     var o = PB.el('div', 'lbox'); o.setAttribute('role', 'dialog'); o.setAttribute('aria-label', 'Imagen ampliada');
     var im = document.createElement('img'); im.src = url; im.alt = 'Imagen ampliada'; o.appendChild(im);
