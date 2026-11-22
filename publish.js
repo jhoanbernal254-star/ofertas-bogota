@@ -143,7 +143,15 @@
     if (designOnly()) return;
     var ad = previewAd();
     if (false) { var t = el('div', 'tile'); t.appendChild(PB.poster(ad, {})); box.appendChild(t); }
-    else { var card = PB.bizCard(ad); card.removeAttribute('href'); card.tabIndex = -1; card.style.pointerEvents = 'none'; box.appendChild(card); }
+    else {
+      var card = PB.bizCard(ad); card.removeAttribute('href'); card.tabIndex = -1; card.style.pointerEvents = 'none';
+      if (C.hasTop(W.tier) && W.fileTop && W.fileTopURL && !wantsDesign()) {
+        box.appendChild(el('p', 'fine', 'Imagen 1 · así se verá tu tarjeta:'));
+        box.appendChild(card);
+        box.appendChild(el('p', 'fine', 'Imagen 2 · así se verá arriba de todas las páginas:'));
+        var st = el('div', 'pv-top'); var im = document.createElement('img'); im.src = W.fileTopURL; im.alt = 'Banner de arriba'; st.appendChild(im); box.appendChild(st);
+      } else box.appendChild(card);
+    }
   }
   function renderSum() {
     var t = totals(), sum = $('sum'); sum.textContent = '';
@@ -207,6 +215,10 @@
     if (dest && !need && fdt && Math.abs(fdt.w / fdt.h - tp.w / tp.h) / (tp.w / tp.h) > 0.06) {
       swt.hidden = false; swt.textContent = 'Tu imagen mide ' + fdt.w + ' × ' + fdt.h + ' px. Se recortará a ' + tp.w + ' × ' + tp.h + ' px. Súbela con esa medida para que no se corte.';
     } else swt.hidden = true;
+    var lm = $('lblMain'); lm.hidden = !dest;
+    lm.textContent = 'Imagen 1 · Para tu tarjeta ' + (W.tier ? C.tiers[W.tier].label : '') + ' (portada, ofertas y directorio)';
+    var tm = $('thumbMain'); tm.hidden = !W.file || !W.fileURL; if (W.file && W.fileURL) tm.src = W.fileURL;
+    var tt = $('thumbTop'); tt.hidden = !W.fileTop || !W.fileTopURL; if (W.fileTop && W.fileTopURL) tt.src = W.fileTopURL;
     $('pickedTop').hidden = !W.fileTop;
     if (W.fileTop) $('pickedTopName').textContent = W.fileTop.name + ' · ' + (W.fileTop.size / 1048576).toFixed(1) + ' MB';
     $('designMore').hidden = !need;

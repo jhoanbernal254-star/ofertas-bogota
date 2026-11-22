@@ -712,3 +712,8 @@ dialog::backdrop { background: rgba(8, 14, 42, 0.6); }
 .vit-cap b { font-size: .95rem; }
 .vit-cap { flex-direction: column; align-items: flex-start; justify-content: flex-end; gap: 4px; }
 .vit-cap .pill { position: static; order: -1; }
+
+.upthumb { height: 44px; width: auto; max-width: 70px; object-fit: cover; border-radius: 6px; margin-right: 8px; vertical-align: middle; }
+.upthumb.wide { height: 36px; max-width: 160px; }
+.pv-top { width: 100%; aspect-ratio: 1600 / 320; overflow: hidden; border-radius: 8px; background: #0F1B3F; }
+.pv-top img { width: 100%; height: 100%; object-fit: cover; display: block; }
