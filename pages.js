@@ -31,6 +31,35 @@
   function plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }
 
   // ---------- Banner Plus y banners (vallas) ----------
+  // Color de los bordes de la imagen del banner, oscurecido, para mezclar la franja con la página.
+  var edgeCache = {}, NAVY = '#0F1B3F';
+  function edgeColor(ad) {
+    var url = ad.media2 && ad.media2.url, key = ad.id + ':' + (url ? url.length : 0);
+    if (edgeCache[key]) return Promise.resolve(edgeCache[key]);
+    return new Promise(function (resolve) {
+      var im = new Image();
+      im.onload = function () {
+        try {
+          var w = 64, h = 13, cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+          var cx = cv.getContext('2d'); cx.drawImage(im, 0, 0, w, h);
+          var d = cx.getImageData(0, 0, w, h).data, r = 0, g = 0, b = 0, n = 0;
+          for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) {
+            if (y > 1 && y < h - 2 && x > 3 && x < w - 4) continue; // solo los bordes
+            var i = (y * w + x) * 4; r += d[i]; g += d[i + 1]; b += d[i + 2]; n++;
+          }
+          r /= n; g /= n; b /= n;
+          var mx = Math.max(r, g, b) / 255, mn = Math.min(r, g, b) / 255, l = (mx + mn) / 2, s = mx === mn ? 0 : (mx - mn) / (1 - Math.abs(2 * l - 1));
+          var hh = 0, dd = mx - mn;
+          if (dd) { var R = r / 255, G = g / 255, B2 = b / 255; hh = mx === R ? ((G - B2) / dd) % 6 : mx === G ? (B2 - R) / dd + 2 : (R - G) / dd + 4; hh = (hh * 60 + 360) % 360; }
+          var out = NAVY;
+          if (s > 0.12 && l > 0.06 && l < 0.95) out = 'hsl(' + Math.round(hh) + ',' + Math.round(Math.min(s, 0.75) * 100) + '%,' + Math.round(Math.min(l, 0.26) * 100) + '%)';
+          edgeCache[key] = out; resolve(out);
+        } catch (e) { resolve(NAVY); }
+      };
+      im.onerror = function () { resolve(NAVY); };
+      im.src = url;
+    });
+  }
   PB.renderPlus = function () {
     var box = $('plusBox');
     if (state.pTimer) { clearInterval(state.pTimer); state.pTimer = null; }
@@ -45,6 +74,7 @@
     if (!show) return;
     if (state.pIdx >= list.length) state.pIdx = 0;
     box.appendChild(PB.topBanner(list[state.pIdx]));
+    (function (ad) { edgeColor(ad).then(function (c) { if (list[state.pIdx] === ad || true) box.style.color = c; }); })(list[state.pIdx]);
     if (list.length > 1 && !PB.reduce) state.pTimer = setInterval(function () { state.pIdx = (state.pIdx + 1) % list.length; PB.renderPlus(); }, 7000);
   };
 
