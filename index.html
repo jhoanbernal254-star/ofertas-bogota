@@ -472,27 +472,89 @@
 
   <!-- Mi panel -->
   <section class="view" id="v-cuenta" aria-labelledby="h-cta" hidden>
-    <div class="in panel-grid">
-      <aside class="pside">
-        <div class="pwho"><small>Comerciante</small><b id="pName"></b><span id="pMail"></span></div>
-        <a class="btn yellow wide" href="#anunciar"><span class="ic" data-ic="plus"></span><span>Nuevo anuncio</span></a>
+    <h1 class="sr" id="h-cta">Mi panel</h1>
+    <div class="adm cli" id="cliBody">
+      <aside class="adm-side" id="cliSide" aria-label="Menú de mi panel">
+        <div class="adm-brand"><span class="logo-ic"><span class="ic" data-ic="tag"></span></span><span class="logo-tx"><b>Ofertas<i>.</i></b><small>BOGOTÁ · MI PANEL</small></span></div>
+        <nav class="adm-nav" id="cliNav"></nav>
+        <div class="adm-side-img" aria-hidden="true"></div>
       </aside>
-      <div class="pmain">
-        <h1 class="h1 dark" id="h-cta">Mis anuncios</h1>
-        <p class="lede">Sigue cada etapa: solicitud, revisión, pago, publicación y vencimiento.</p>
-        <p class="msg" id="myMsg" role="status" aria-live="polite"></p>
-        <div class="crow"><h2 class="h3" id="noticeHead">Bandeja de notificaciones</h2><button class="btn sm ghost" type="button" id="readAll">Marcar todas como leídas</button></div>
-        <p class="fine" id="noticeNote"></p>
-        <div class="list" id="myNotices"></div>
-        <h2 class="h3">Mis solicitudes</h2>
-        <div class="list" id="myList"></div>
-        <h2 class="h3">Anuncios publicados</h2>
-        <div class="list" id="myAds"></div>
-        <details class="arch-box" id="myArch">
-          <summary id="myArchSum">Archivo</summary>
-          <p class="fine">Lo que archivas no sale en las listas de arriba. Puedes restaurarlo cuando quieras.</p>
-          <div class="list" id="myArchList"></div>
-        </details>
+      <div class="adm-shade" id="cliShade"></div>
+      <div class="adm-main">
+        <header class="adm-top">
+          <button class="adm-burger" type="button" id="cliBurger" aria-label="Abrir el menú"><span class="ic" data-ic="menu"></span></button>
+          <div class="adm-hello"><h2 id="cliHello">¡Hola!</h2><p>Panel de tu negocio en Ofertas Bogotá</p></div>
+          <div class="adm-tools">
+            <div class="adm-dd">
+              <button class="adm-ic" type="button" id="cliBell" aria-label="Pendientes" aria-expanded="false"><span class="ic" data-ic="bell"></span><span class="adm-dot" id="cliBellN" hidden></span></button>
+              <div class="adm-menu" id="cliBellMenu" hidden></div>
+            </div>
+            <div class="adm-dd">
+              <button class="adm-user" type="button" id="cliUser" aria-expanded="false"><span class="adm-av" id="cliAv">A</span><span class="adm-un"><b id="cliName">Mi cuenta</b><small id="cliMail"></small></span><span class="adm-car">▾</span></button>
+              <div class="adm-menu" id="cliUserMenu" hidden>
+                <button type="button" id="cliData">Mis datos y seguridad</button>
+                <button type="button" id="cliOut">Cerrar sesión</button>
+              </div>
+            </div>
+          </div>
+        </header>
+        <div class="adm-content">
+          <p class="msg" id="myMsg" role="status" aria-live="polite"></p>
+
+          <section class="adm-sec" data-sec="inicio" hidden><div class="dash" id="cdash"></div></section>
+
+          <section class="adm-sec" data-sec="anuncios" hidden>
+            <div class="crow"><h2 class="adm-h">Mis anuncios</h2><a class="btn sm yellow" href="#anunciar">Nuevo anuncio</a></div>
+            <div class="list" id="myAds"></div>
+            <details class="arch-box" id="myArch">
+              <summary id="myArchSum">Archivo</summary>
+              <p class="fine">Lo que archivas no sale en la lista de arriba. Puedes restaurarlo cuando quieras.</p>
+              <div class="list" id="myArchList"></div>
+            </details>
+          </section>
+
+          <section class="adm-sec" data-sec="solicitudes" hidden>
+            <h2 class="adm-h">Mis solicitudes</h2>
+            <p class="fine">Sigue cada etapa: solicitud, revisión, pago, publicación y vencimiento.</p>
+            <div class="list" id="myList"></div>
+          </section>
+
+          <section class="adm-sec" data-sec="estadisticas" hidden>
+            <h2 class="adm-h">Estadísticas</h2>
+            <p class="fine">Visitas y clics de contacto de cada anuncio, desde que se publicó.</p>
+            <div class="dpanel" id="cStats"></div>
+          </section>
+
+          <section class="adm-sec" data-sec="plan" hidden>
+            <h2 class="adm-h">Mi plan</h2>
+            <div class="list" id="cPlan"></div>
+          </section>
+
+          <section class="adm-sec" data-sec="contratos" hidden>
+            <h2 class="adm-h">Contratos</h2>
+            <p class="fine">Solicita el contrato de tus anuncios aprobados. Lo revisamos, te lo enviamos aquí y puedes guardarlo en PDF.</p>
+            <div class="list" id="cContracts"></div>
+          </section>
+
+          <section class="adm-sec" data-sec="informes" hidden>
+            <h2 class="adm-h">Informes</h2>
+            <p class="fine">El informe de cada anuncio publicado: visitas, clics y cómo le va. Se guarda en PDF.</p>
+            <div class="list" id="cReports"></div>
+          </section>
+
+          <section class="adm-sec" data-sec="notificaciones" hidden>
+            <div class="crow"><h2 class="adm-h" id="noticeHead">Notificaciones</h2><button class="btn sm ghost" type="button" id="readAll">Marcar todas como leídas</button></div>
+            <p class="fine" id="noticeNote"></p>
+            <div class="list" id="myNotices"></div>
+          </section>
+
+          <section class="adm-sec" data-sec="datos" hidden>
+            <h2 class="adm-h">Mis datos y seguridad</h2>
+            <div class="card" id="cData"></div>
+          </section>
+
+          <div class="cpromo" id="cPromo" hidden></div>
+        </div>
       </div>
     </div>
   </section>
@@ -530,19 +592,82 @@
 
   <!-- Administrar -->
   <section class="view" id="v-admin" aria-labelledby="h-admin" hidden>
-    <div class="in admin-wrap">
-      <h1 class="h1 dark" id="h-admin">Administrar</h1>
-      <p class="lede">Solo lo ven los administradores.</p>
-      <p class="note bad" id="adminDenied" hidden>Tu cuenta no tiene permisos de administrador.</p>
-      <div class="admin-cols" id="adminBody">
-        <div class="stats" id="stats"></div>
-        <p class="msg" id="admMsg" role="status" aria-live="polite"></p>
-        <div>
-          <div class="crow"><h2 class="h3" id="inboxHead">Bandeja: solicitudes de clientes</h2></div>
-          <p class="fine">Cambios o eliminaciones que piden los clientes. Nada se publica solo: tú decides.</p>
-          <div class="list" id="inboxList"></div>
-          <h2 class="h3">Reportes de anuncios</h2>
-          <div class="list" id="reportList"></div>
+    <h1 class="sr" id="h-admin">Administración</h1>
+    <p class="note bad in" id="adminDenied" hidden>Tu cuenta no tiene permisos de administrador. <button class="btn sm ghost" type="button" id="denySalir">Salir</button></p>
+    <div class="adm" id="adminBody">
+      <aside class="adm-side" id="admSide" aria-label="Menú de administración">
+        <div class="adm-brand"><span class="logo-ic"><span class="ic" data-ic="tag"></span></span><span class="logo-tx"><b>Ofertas<i>.</i></b><small>BOGOTÁ · ADMIN</small></span></div>
+        <nav class="adm-nav" id="admNav"></nav>
+        <div class="adm-side-img" aria-hidden="true"></div>
+      </aside>
+      <div class="adm-shade" id="admShade"></div>
+      <div class="adm-main">
+        <header class="adm-top">
+          <button class="adm-burger" type="button" id="admBurger" aria-label="Abrir el menú"><span class="ic" data-ic="menu"></span></button>
+          <div class="adm-hello"><h2 id="admHello">¡Hola, Administrador!</h2><p>Bienvenido al panel de Ofertas Bogotá</p></div>
+          <div class="adm-tools">
+            <div class="adm-dd">
+              <button class="adm-ic" type="button" id="admBell" aria-label="Pendientes" aria-expanded="false"><span class="ic" data-ic="bell"></span><span class="adm-dot" id="admBellN" hidden></span></button>
+              <div class="adm-menu" id="admBellMenu" hidden></div>
+            </div>
+            <div class="adm-dd">
+              <button class="adm-user" type="button" id="admUser" aria-expanded="false"><span class="adm-av" id="admAv">A</span><span class="adm-un"><b id="admName">Admin</b><small id="admMail"></small></span><span class="adm-car">▾</span></button>
+              <div class="adm-menu" id="admUserMenu" hidden>
+                <button type="button" id="admSettings">Ajustes</button>
+                <button type="button" id="admOut">Salir</button>
+              </div>
+            </div>
+          </div>
+        </header>
+        <div class="adm-content">
+          <p class="msg" id="admMsg" role="status" aria-live="polite"></p>
+
+          <section class="adm-sec" data-sec="dash" id="sec-dash">
+            <div class="dash" id="dash"></div>
+          </section>
+
+          <section class="adm-sec" data-sec="solicitudes" id="sec-solicitudes" hidden>
+            <h2 class="adm-h">Solicitudes por revisar</h2>
+            <div class="list" id="reviewList"></div>
+            <h2 class="adm-h">Esperando pago</h2>
+            <div class="list" id="payList"></div>
+          </section>
+
+          <section class="adm-sec" data-sec="pedidos" id="sec-pedidos" hidden>
+            <h2 class="adm-h">Todos los pedidos</h2>
+            <div class="filters" id="orderFilters" role="group" aria-label="Filtrar pedidos"></div>
+            <div class="list" id="orderList"></div>
+          </section>
+
+          <section class="adm-sec" data-sec="anuncios" id="sec-anuncios" hidden>
+            <div class="crow"><h2 class="adm-h">Anuncios</h2><button class="btn sm yellow" type="button" id="newAd">Crear anuncio</button></div>
+            <div class="filters" id="adFilters" role="group" aria-label="Filtrar anuncios"></div>
+            <div class="list" id="adList"></div>
+          </section>
+
+          <section class="adm-sec" data-sec="bandeja" id="sec-bandeja" hidden>
+            <h2 class="adm-h" id="inboxHead">Bandeja: solicitudes de clientes</h2>
+            <p class="fine">Cambios o eliminaciones que piden los clientes. Nada se publica solo: tú decides.</p>
+            <div class="list" id="inboxList"></div>
+          </section>
+
+          <section class="adm-sec" data-sec="reportes" id="sec-reportes" hidden>
+            <h2 class="adm-h">Reportes de anuncios</h2>
+            <div class="list" id="reportList"></div>
+          </section>
+
+          <section class="adm-sec" data-sec="contratos" id="sec-contratos" hidden>
+            <h2 class="adm-h" id="ctHead">Contratos</h2>
+            <p class="fine">El cliente solicita su contrato; tú lo revisas, corriges los datos si hace falta y lo envías. Solo así le aparece en su panel.</p>
+            <h3 class="adm-h3">Solicitados por clientes</h3>
+            <div class="list" id="ctReq"></div>
+            <h3 class="adm-h3">Aprobados sin solicitar (puedes enviarlos igual)</h3>
+            <div class="list" id="ctNone"></div>
+            <h3 class="adm-h3">Ya enviados</h3>
+            <div class="list" id="ctSent"></div>
+          </section>
+
+          <section class="adm-sec" data-sec="informes" id="sec-informes" hidden>
           <h2 class="h3">Informes</h2>
           <div class="card"><p class="fine">Resumen completo de todos los clientes: ingresos, qué se vendió más, quién tuvo más visitas, quién renueva y qué mejorar. Se guarda en PDF.</p><div class="acts"><a class="btn navy" href="#informe-admin">Ver informe general</a></div></div>
           <h2 class="h3">Base de datos de clientes</h2>
@@ -552,41 +677,20 @@
             <div class="acts"><button class="btn sm ghost" type="button" id="db-csv">Descargar todo (CSV)</button><span class="meta" id="db-count"></span></div>
           </div>
           <div class="list" id="db-res"></div>
-        </div>
-        <div>
-          <h2 class="h3">Solicitudes por revisar</h2>
-          <div class="list" id="reviewList"></div>
-        </div>
-        <div>
-          <h2 class="h3">Esperando pago</h2>
-          <div class="list" id="payList"></div>
-        </div>
-        <div>
-          <div class="crow">
-            <h2 class="h3">Anuncios</h2>
-            <button class="btn sm navy" type="button" id="newAd">Crear anuncio</button>
-          </div>
-          <div class="filters" id="adFilters" role="group" aria-label="Filtrar anuncios"></div>
-          <div class="list" id="adList"></div>
-        </div>
-        <div>
-          <h2 class="h3">Todos los pedidos</h2>
-          <div class="filters" id="orderFilters" role="group" aria-label="Filtrar pedidos"></div>
-          <div class="list" id="orderList"></div>
-        </div>
-        <div>
-          <details class="arch-box" id="archBox">
-            <summary id="archSum">Archivo</summary>
+          </section>
+
+          <section class="adm-sec" data-sec="archivo" id="sec-archivo" hidden>
+            <h2 class="adm-h" id="archSum">Archivo</h2>
             <p class="fine">Aquí quedan lo rechazado, lo desactivado y lo que archives. No salen en las listas principales.</p>
-            <h3 class="h3">Anuncios archivados</h3>
+            <h3 class="adm-h3">Anuncios archivados</h3>
             <div class="list" id="archAds"></div>
-            <h3 class="h3">Solicitudes de clientes atendidas</h3>
+            <h3 class="adm-h3">Solicitudes de clientes atendidas</h3>
             <div class="list" id="archInbox"></div>
-            <h3 class="h3">Pedidos archivados</h3>
+            <h3 class="adm-h3">Pedidos archivados</h3>
             <div class="list" id="archOrders"></div>
-          </details>
-        </div>
-        <div>
+          </section>
+
+          <section class="adm-sec" data-sec="config" id="sec-config" hidden>
           <h2 class="h3">Precios, cupos y lanzamiento</h2>
           <div class="card">
             <p class="fine">Los precios son por el mes completo. Los días y semanas se calculan solos. Los cambios los ven los visitantes de inmediato.</p>
@@ -607,8 +711,12 @@
               <div class="fld"><label for="a-luntil">El lanzamiento gratis termina el</label><input id="a-luntil" type="date"></div>
             </div>
             <label class="check"><input type="checkbox" id="a-lenabled"> <span>Lanzamiento activo: todos los espacios publicitarios cuestan $0 y se muestra el precio normal tachado (el diseño y las páginas web siguen con precio)</span></label>
-            <div class="acts"><button class="btn sm navy" type="button" id="saveCfg">Guardar</button></div>
+            <h3 class="adm-h3">Mensajes para los clientes (pie de Mi panel)</h3>
+            <p class="fine">Salen en una franja al final del panel de cada cliente. El de "Publicidad gratis" sale solo mientras el lanzamiento esté activo. Aquí puedes agregar hasta 3 más; si hay varios, rotan.</p>
+            <div id="noteBox"></div>
+            <div class="acts"><button class="btn sm yellow" type="button" id="saveCfg">Guardar</button></div>
           </div>
+          </section>
         </div>
       </div>
     </div>

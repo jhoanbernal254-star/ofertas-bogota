@@ -11,6 +11,7 @@
     return { no: C.contractNo(o), legalName: src.legalName || '', docId: src.docId || '', ad: ad };
   };
   PB.canContract = function (o) { return o.status === 'aprobado' || o.status === 'por_pagar' || o.status === 'pago_reportado'; };
+  PB.contractReady = function (o) { return PB.isAdmin() || o.contractStatus === 'enviado'; };
   PB.contractLink = function (o, cls) {
     var a = el('a', cls || 'btn sm ghost', 'Ver contrato'); a.href = '#contrato-' + o.id; return a;
   };
@@ -32,6 +33,10 @@
     var box = $('contractBody'); box.textContent = '';
     var o = state.orders.filter(function (x) { return x.id === state.contractId; })[0];
     if (!o) { box.appendChild(el('p', 'note', state.status === 'ok' && state.authReady ? 'No encontramos este contrato.' : 'Cargando…')); return; }
+    if (!PB.contractReady(o)) {
+      box.appendChild(el('p', 'note', o.contractStatus === 'solicitado' ? 'Tu contrato está en revisión. Cuando lo enviemos te avisamos y lo verás en Contratos.' : 'Este contrato todavía no se ha enviado. Pídelo desde la sección Contratos de tu panel.'));
+      var back = el('a', 'btn ghost', 'Ir a mi panel'); back.href = '#cuenta'; box.appendChild(back); return;
+    }
     var d = PB.contractData(o), L = C.legal, ad = d.ad;
     var P1 = page(), P2 = page(), in1 = P1.body, in2 = P2.body;
 

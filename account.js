@@ -112,13 +112,11 @@
     la.textContent = ''; lo.textContent = ''; ln.textContent = ''; lar.textContent = '';
     $('noticeNote').textContent = 'Aquí te avisamos si aceptamos, rechazamos o desactivamos algo, y la respuesta a tus solicitudes de cambio.';
     if (!state.user) return;
-    $('pName').textContent = state.user.name || state.user.email;
-    $('pMail').textContent = state.user.name ? state.user.email : '';
 
     // Bandeja
     var all = state.notices.filter(function (n) { return n.archivedClient !== true; });
     var unread = all.filter(function (n) { return n.dir !== 'admin' && n.read !== true; });
-    $('noticeHead').textContent = 'Bandeja de notificaciones' + (unread.length ? ' (' + unread.length + ' sin leer)' : '');
+    $('noticeHead').textContent = 'Notificaciones' + (unread.length ? ' (' + unread.length + ' sin leer)' : '');
     var ra = $('readAll'); ra.hidden = !unread.length;
     ra.onclick = async function () { try { for (var i = 0; i < unread.length; i++) await B.patchNotice(unread[i].id, { read: true }); } catch (err) { PB.setMsg($('myMsg'), PB.errText(err), 'err'); } };
     if (!all.length) ln.appendChild(el('p', 'fine', 'Todavía no tienes notificaciones.'));
@@ -151,7 +149,7 @@
       c.appendChild(PB.timeline(o));
       if (!archived && (o.status === 'por_pagar' || o.status === 'pago_reportado')) c.appendChild(PB.payBox(o, $('myMsg')));
       var ca = el('div', 'acts');
-      if (PB.canContract(o)) { ca.appendChild(PB.contractLink(o)); ca.appendChild(el('span', 'meta', 'Contrato ' + C.contractNo(o))); }
+      if (PB.canContract(o) && o.contractStatus === 'enviado') { ca.appendChild(PB.contractLink(o)); ca.appendChild(el('span', 'meta', 'Contrato ' + C.contractNo(o))); }
       var ad = o.tier && !o.renewOf ? PB.findAd(o.id) : null;
       var done = o.status === 'rechazado' || (o.status === 'aprobado' && (!o.tier || o.renewOf || !ad || !PB.visible(ad)));
       if (archived) ca.appendChild(arch('order', o, false, 'Restaurar')); else if (done) ca.appendChild(arch('order', o, true, 'Archivar'));
@@ -205,7 +203,171 @@
     if (!mineA.length && !ordsA.length) lar.appendChild(el('p', 'fine', 'Nada archivado.'));
     mineA.forEach(function (ad) { lar.appendChild(adCard(ad, true)); });
     ordsA.forEach(function (o) { lar.appendChild(ordCard(o, true)); });
+    renderCliShell(mine, ords, unread);
   };
+
+
+  // ---------- Estructura del panel del cliente: menú, cabecera, dashboard ----------
+  var CSECS = [['inicio', 'Inicio', 'grid'], ['anuncios', 'Mis anuncios', 'megaphone'], ['solicitudes', 'Mis solicitudes', 'inbox'], ['estadisticas', 'Estadísticas', 'filechart'],
+    ['plan', 'Mi plan', 'layers'], ['contratos', 'Contratos', 'calendar'], ['informes', 'Informes', 'eye'], ['notificaciones', 'Notificaciones', 'bell'], ['datos', 'Mis datos', 'gear']];
+  var cliSec = 'inicio', cliWired = false, promoIdx = 0, promoTimer = null;
+  try { var csv0 = sessionStorage.getItem('pb-cli-sec'); if (csv0 && CSECS.some(function (x) { return x[0] === csv0; })) cliSec = csv0; } catch (e) {}
+  function cShow() {
+    Array.prototype.forEach.call(document.querySelectorAll('#cliBody .adm-sec'), function (s) { s.hidden = s.getAttribute('data-sec') !== cliSec; });
+    Array.prototype.forEach.call(document.querySelectorAll('#cliNav .adm-it'), function (b) { b.classList.toggle('on', b.getAttribute('data-sec') === cliSec); });
+  }
+  PB.cliGo = function (sec) {
+    cliSec = sec; try { sessionStorage.setItem('pb-cli-sec', sec); } catch (e) {}
+    cShow(); $('cliSide').classList.remove('open'); $('cliShade').classList.remove('on');
+    ['cliBellMenu', 'cliUserMenu'].forEach(function (id) { $(id).hidden = true; }); window.scrollTo(0, 0);
+  };
+  function cCloseMenus() { ['cliBellMenu', 'cliUserMenu'].forEach(function (id) { $(id).hidden = true; }); }
+  function cWire() {
+    if (cliWired) return; cliWired = true;
+    $('cliBurger').addEventListener('click', function () { $('cliSide').classList.add('open'); $('cliShade').classList.add('on'); });
+    $('cliShade').addEventListener('click', function () { $('cliSide').classList.remove('open'); $('cliShade').classList.remove('on'); });
+    $('cliBell').addEventListener('click', function (e) { e.stopPropagation(); var m = $('cliBellMenu'), was = m.hidden; cCloseMenus(); m.hidden = !was; });
+    $('cliUser').addEventListener('click', function (e) { e.stopPropagation(); var m = $('cliUserMenu'), was = m.hidden; cCloseMenus(); m.hidden = !was; });
+    document.addEventListener('click', function (e) { if (!e.target.closest || !e.target.closest('#cliBody .adm-dd')) cCloseMenus(); });
+    $('cliData').addEventListener('click', function () { PB.cliGo('datos'); });
+    $('cliOut').addEventListener('click', function () { $('logoutBtn').click(); });
+  }
+  function perfBars(box, ads) {
+    box.textContent = '';
+    if (!ads.length) { box.appendChild(el('p', 'fine', 'Cuando tengas anuncios publicados verás aquí cómo les va.')); return; }
+    var max = Math.max(1, Math.max.apply(null, ads.map(function (a) { return Math.max(a.views || 0, clickSum(a)); })));
+    var lg = el('div', 'legend'); lg.innerHTML = '<span><i class="a"></i>Visitas</span><span><i class="b"></i>Clics de contacto</span>'; box.appendChild(lg);
+    ads.forEach(function (a) {
+      var r = el('div', 'pbar'); r.appendChild(el('div', 'pbar-n', PB.clip(a.brand, 28) + ' · ' + PB.tierLabel(a.tier)));
+      [['a', a.views || 0], ['b', clickSum(a)]].forEach(function (x) { var l = el('div', 'pbar-l'), t = el('div', 'pbar-t'), f = el('i', x[0]); f.style.width = Math.max(2, Math.round(100 * x[1] / max)) + '%'; t.appendChild(f); l.appendChild(t); l.appendChild(el('b', '', String(x[1]))); r.appendChild(l); });
+      box.appendChild(r);
+    });
+  }
+  function clickSum(a) { return (a.clicksWhatsapp || 0) + (a.clicksPhone || 0) + (a.clicksEmail || 0) + (a.clicksWeb || 0); }
+  function drawPromo() {
+    clearInterval(promoTimer);
+    var box = $('cPromo'), items = [], cfg = PB.cfg(), today = new Date(Date.now() - 5 * 36e5).toISOString().slice(0, 10);
+    if (PB.launchOn()) items.push({ t: 'Publicidad GRATIS', x: 'Hasta el ' + C.launchUntilLabel(state.config), link: '#anunciar', lb: 'Publica tu anuncio' });
+    (cfg.notes || []).forEach(function (n) { if (n.enabled && (n.title || n.text) && (!n.until || n.until >= today)) items.push({ t: n.title, x: n.text, link: n.link, lb: 'Ver más' }); });
+    box.hidden = !items.length; box.textContent = '';
+    if (!items.length) return;
+    function show() {
+      var it = items[promoIdx % items.length]; box.textContent = '';
+      var t = el('div', 'bn-t'); if (it.t) t.appendChild(el('b', '', it.t)); if (it.x) t.appendChild(el('span', '', it.x)); box.appendChild(t);
+      if (it.link) { var a = el('a', 'bn-url', it.lb); a.href = it.link; if (/^https:/.test(it.link)) { a.target = '_blank'; a.rel = 'noopener noreferrer'; } box.appendChild(a); }
+      if (items.length > 1) { var dots = el('div', 'bn-dots'); items.forEach(function (_, i) { dots.appendChild(el('i', i === promoIdx % items.length ? 'on' : '')); }); box.appendChild(dots); }
+    }
+    show();
+    if (items.length > 1) promoTimer = setInterval(function () { if (state.view !== 'cuenta') return; promoIdx++; show(); }, 6000);
+  }
+
+  function renderCliShell(mine, ords, unread) {
+    cWire();
+    var u = state.user, money = PB.money, name = u.name || '', first = name.split(' ')[0];
+    $('cliHello').textContent = '¡Hola' + (first ? ', ' + first : '') + '!';
+    $('cliName').textContent = name || 'Mi cuenta'; $('cliMail').textContent = u.email || ''; $('cliAv').textContent = ((name || u.email || 'A')[0] || 'A').toUpperCase();
+    var live = mine.filter(PB.visible), soon = mine.filter(function (a) { return PB.visible(a) && PB.daysLeft(a) <= 7; });
+    var expired = mine.filter(function (a) { return PB.adStatus(a).k === 'vencido'; });
+    var open = ords.filter(function (o) { return PB.OPEN.indexOf(o.status) >= 0; });
+    var topay = ords.filter(function (o) { return o.status === 'por_pagar'; });
+    var views = mine.reduce(function (t, a) { return t + (a.views || 0); }, 0), clicks = mine.reduce(function (t, a) { return t + clickSum(a); }, 0);
+    var badges = { solicitudes: open.length, notificaciones: unread.length };
+
+    var nav = $('cliNav'); nav.textContent = '';
+    CSECS.forEach(function (x) {
+      var b = el('button', 'adm-it' + (x[0] === cliSec ? ' on' : '')); b.type = 'button'; b.setAttribute('data-sec', x[0]);
+      b.appendChild(PB.ic(x[2])); b.appendChild(el('span', '', x[1])); if (badges[x[0]]) b.appendChild(el('em', 'adm-bd', String(badges[x[0]])));
+      b.addEventListener('click', function () { PB.cliGo(x[0]); }); nav.appendChild(b);
+    });
+    var out = el('button', 'adm-it'); out.type = 'button'; out.appendChild(PB.ic('x')); out.appendChild(el('span', '', 'Cerrar sesión')); out.addEventListener('click', function () { $('logoutBtn').click(); }); nav.appendChild(out);
+
+    var total = unread.length + topay.length + soon.length + expired.length, dot = $('cliBellN'); dot.hidden = !total; dot.textContent = String(total);
+    var bm = $('cliBellMenu'); bm.textContent = '';
+    var items = [['notificaciones', unread.length, 'notificaciones sin leer'], ['solicitudes', topay.length, 'por pagar'], ['anuncios', soon.length, 'anuncios por vencer'], ['anuncios', expired.length, 'anuncios vencidos']].filter(function (x) { return x[1]; });
+    if (!items.length) bm.appendChild(el('p', 'fine', 'Todo al día. No tienes pendientes.'));
+    items.forEach(function (x) { var b = el('button', '', x[1] + ' ' + x[2]); b.type = 'button'; b.addEventListener('click', function () { PB.cliGo(x[0]); }); bm.appendChild(b); });
+
+    // Inicio
+    var d = $('cdash'); d.textContent = '';
+    var cards = [['megaphone', 'Anuncios activos', String(live.length), soon.length + ' vencen en 7 días', 'anuncios', 'c1'], ['inbox', 'Solicitudes en curso', String(open.length), topay.length + ' por pagar', 'solicitudes', 'c2'],
+      ['eye', 'Visualizaciones', String(views), 'desde que se publicaron', 'estadisticas', 'c3'], ['cart', 'Clics / contactos', String(clicks), 'WhatsApp, llamadas, correo y web', 'estadisticas', 'c4']];
+    var row = el('div', 'dcards');
+    cards.forEach(function (c) {
+      var b = el('button', 'dcard ' + c[5]); b.type = 'button'; var ic = el('span', 'dc-ic'); ic.appendChild(PB.ic(c[0])); b.appendChild(ic);
+      var tx = el('span', 'dc-tx'); tx.appendChild(el('small', '', c[1])); tx.appendChild(el('b', '', c[2])); tx.appendChild(el('em', '', c[3])); b.appendChild(tx);
+      b.addEventListener('click', function () { PB.cliGo(c[4]); }); row.appendChild(b);
+    });
+    d.appendChild(row);
+
+    var g = el('div', 'dgrid2');
+    var pr = el('div', 'dpanel wide'); pr.appendChild(el('h3', '', 'Mis anuncios recientes'));
+    var recent = mine.slice().sort(function (a, b) { return (b.startsAt || 0) - (a.startsAt || 0); }).slice(0, 3);
+    if (!recent.length) pr.appendChild(el('p', 'fine', 'Todavía no tienes anuncios. Crea el primero y llegas a más clientes.'));
+    recent.forEach(function (a) {
+      var st = PB.adStatus(a), r = el('div', 'rrow'); var t = el('div', 'rr-t'); t.appendChild(el('b', '', PB.clip(a.brand, 30))); t.appendChild(el('span', 'chipst st-' + st.k, st.t)); r.appendChild(t);
+      r.appendChild(el('small', '', 'Visitas ' + (a.views || 0) + ' · Clics ' + clickSum(a) + (a.startsAt ? ' · Publicado ' + PB.fmtDate(a.startsAt) : '')));
+      var v = el('a', 'btn sm ghost', 'Ver ficha'); v.href = '#anuncio-' + a.id; r.appendChild(v); pr.appendChild(r);
+    });
+    var all = el('button', 'btn sm ghost', 'Ver todos mis anuncios'); all.type = 'button'; all.addEventListener('click', function () { PB.cliGo('anuncios'); }); pr.appendChild(all);
+    g.appendChild(pr);
+    var qa = el('div', 'dpanel'); qa.appendChild(el('h3', '', 'Acciones rápidas'));
+    var q1 = el('a', 'btn yellow wide', 'Crear nuevo anuncio'); q1.href = '#anunciar'; qa.appendChild(q1);
+    [['Renovar un anuncio', 'anuncios'], ['Ver estadísticas', 'estadisticas'], ['Ver mi plan', 'plan'], ['Mis contratos', 'contratos']].forEach(function (x) { var b = el('button', 'btn ghost wide', x[0]); b.type = 'button'; b.addEventListener('click', function () { PB.cliGo(x[1]); }); qa.appendChild(b); });
+    g.appendChild(qa); d.appendChild(g);
+
+    var g2 = el('div', 'dgrid2');
+    var pf = el('div', 'dpanel wide'); pf.appendChild(el('h3', '', 'Rendimiento de mis anuncios')); var pb = el('div'); pf.appendChild(pb); perfBars(pb, live.concat(mine.filter(function (a) { return !PB.visible(a) && a.startsAt; })).slice(0, 5)); g2.appendChild(pf);
+    var pp = el('div', 'dpanel'); pp.appendChild(el('h3', '', 'Mi plan'));
+    var best = live.slice().sort(function (a, b) { return Object.keys(C.tiers).indexOf(a.tier) - Object.keys(C.tiers).indexOf(b.tier); })[0];
+    if (best) { pp.appendChild(el('b', 'plan-n', C.tiers[best.tier].label)); pp.appendChild(el('p', 'fine', 'Vigente hasta el ' + PB.fmtDate(best.endsAt))); pp.appendChild(el('p', '', C.tiers[best.tier].note || '')); }
+    else pp.appendChild(el('p', 'fine', 'Aún no tienes un plan activo.'));
+    var mp = el('button', 'btn ghost wide', 'Gestionar mi plan'); mp.type = 'button'; mp.addEventListener('click', function () { PB.cliGo('plan'); }); pp.appendChild(mp);
+    g2.appendChild(pp); d.appendChild(g2);
+
+    // Estadísticas
+    perfBars($('cStats'), mine.filter(function (a) { return a.startsAt; }));
+    // Plan
+    var pl = $('cPlan'); pl.textContent = '';
+    if (!mine.length) pl.appendChild(el('p', 'fine', 'Todavía no tienes anuncios. Mira los planes y elige el tuyo.'));
+    mine.forEach(function (a) {
+      var st = PB.adStatus(a), c = el('div', 'card'), top = el('div', 'crow'); top.appendChild(el('h3', '', C.tiers[a.tier] ? C.tiers[a.tier].label : PB.tierLabel(a.tier))); top.appendChild(el('span', 'chipst st-' + st.k, st.t)); c.appendChild(top);
+      c.appendChild(el('p', 'meta', PB.clip(a.brand, 40) + (a.endsAt ? ' · ' + (st.k === 'vencido' ? 'venció' : 'vigente hasta') + ' el ' + PB.fmtDate(a.endsAt) : '')));
+      if (C.tiers[a.tier]) c.appendChild(el('p', 'fine', C.tiers[a.tier].note || ''));
+      var ac = el('div', 'acts'), go = el('button', 'btn sm yellow', 'Renovar o administrar'); go.type = 'button'; go.addEventListener('click', function () { PB.cliGo('anuncios'); }); ac.appendChild(go);
+      var pl2 = el('a', 'btn sm ghost', 'Ver planes y precios'); pl2.href = '#planes'; ac.appendChild(pl2); c.appendChild(ac); pl.appendChild(c);
+    });
+    // Contratos
+    var cc = $('cContracts'); cc.textContent = '';
+    var withC = ords.concat(state.orders.filter(function (o) { return o.clientArchived === true; })).filter(function (o) { return PB.canContract(o); });
+    if (!withC.length) cc.appendChild(el('p', 'fine', 'Cuando aprobemos tu anuncio podrás solicitar aquí su contrato.'));
+    withC.forEach(function (o) {
+      var c = el('div', 'card'), top = el('div', 'crow'); top.appendChild(el('h3', '', PB.orderTitle(o))); top.appendChild(el('span', 'meta', 'Contrato ' + C.contractNo(o))); c.appendChild(top);
+      var ac = el('div', 'acts');
+      if (o.contractStatus === 'enviado') { c.appendChild(el('p', 'meta', 'Enviado el ' + PB.fmtDate(o.contractSentAt || Date.now()))); ac.appendChild(PB.contractLink(o, 'btn sm yellow')); }
+      else if (o.contractStatus === 'solicitado') c.appendChild(el('p', 'meta', 'Solicitado el ' + PB.fmtDate(o.contractRequestedAt || Date.now()) + ' · lo estamos revisando. Te avisamos aquí cuando esté listo.'));
+      else {
+        c.appendChild(el('p', 'fine', 'Pídelo cuando lo necesites. Lo revisamos y te lo enviamos a esta sección.'));
+        var rq = el('button', 'btn sm yellow', 'Solicitar contrato'); rq.type = 'button';
+        rq.addEventListener('click', async function () { rq.disabled = true; try { await B.requestContract(o.id); PB.setMsg($('myMsg'), 'Solicitud enviada. Te avisamos cuando el contrato esté listo.', 'ok'); } catch (err) { rq.disabled = false; PB.setMsg($('myMsg'), PB.errText(err), 'err'); } });
+        ac.appendChild(rq);
+      }
+      if (ac.childNodes.length) c.appendChild(ac); cc.appendChild(c);
+    });
+    // Informes
+    var rr = $('cReports'); rr.textContent = '';
+    var pub = mine.filter(function (a) { return a.startsAt; });
+    if (!pub.length) rr.appendChild(el('p', 'fine', 'Cuando tu anuncio esté publicado, aquí verás su informe.'));
+    pub.forEach(function (a) { var st = PB.adStatus(a), c = el('div', 'card'), top = el('div', 'crow'); top.appendChild(el('h3', '', PB.clip(a.brand, 30) + ' · ' + PB.tierLabel(a.tier))); top.appendChild(el('span', 'chipst st-' + st.k, st.t)); c.appendChild(top); c.appendChild(PB.statsLine(a)); var ac = el('div', 'acts'); ac.appendChild(PB.reportLink(a, 'btn sm yellow')); c.appendChild(ac); rr.appendChild(c); });
+    // Datos
+    var dt = $('cData'); dt.textContent = '';
+    [['Nombre', name || '—'], ['Correo', u.email || '—'], ['Correo verificado', u.emailVerified === false ? 'Aún no' : 'Sí']].forEach(function (x) { var p = el('p', ''); p.appendChild(el('b', '', x[0] + ': ')); p.appendChild(document.createTextNode(x[1])); dt.appendChild(p); });
+    dt.appendChild(el('h3', '', 'Contraseña'));
+    dt.appendChild(el('p', 'fine', 'Te enviamos un enlace a tu correo para que crees una contraseña nueva. Es gratis.'));
+    var rb = el('button', 'btn sm yellow', 'Enviarme el enlace'); rb.type = 'button';
+    rb.addEventListener('click', async function () { try { await B.resetPassword(u.email); PB.setMsg($('myMsg'), 'Listo. Revisa tu correo (y la carpeta de spam).', 'ok'); } catch (err) { PB.setMsg($('myMsg'), PB.errText(err), 'err'); } });
+    dt.appendChild(rb);
+    drawPromo(); cShow();
+  }
 
   // ---------- Estado del pedido (después de enviar) ----------
   PB.renderPago = function () {
@@ -227,7 +389,7 @@
     card.appendChild(PB.timeline(o));
     if (o.status === 'por_pagar' || o.status === 'pago_reportado') card.appendChild(PB.payBox(o, null));
     var acts = el('div', 'acts');
-    if (PB.canContract(o)) acts.appendChild(PB.contractLink(o, 'btn ghost'));
+    if (PB.canContract(o) && o.contractStatus === 'enviado') acts.appendChild(PB.contractLink(o, 'btn ghost'));
     var my = el('a', 'btn navy', 'Ir a mi panel'); my.href = '#cuenta'; acts.appendChild(my);
     var hm = el('a', 'btn ghost', 'Volver al inicio'); hm.href = '#inicio'; acts.appendChild(hm);
     card.appendChild(acts);

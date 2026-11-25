@@ -202,6 +202,16 @@
     await batch.commit();
     return { free: false };
   };
+  B.requestContract = function (id) {
+    return F.updateDoc(F.doc(db, 'orders', id), { contractStatus: 'solicitado', contractRequestedAt: Date.now() });
+  };
+  B.sendContract = async function (o, fix) {
+    var f = { contractStatus: 'enviado', contractSentAt: Date.now() };
+    if (fix && fix.legalName != null) f.legalName = String(fix.legalName).slice(0, 80);
+    if (fix && fix.docId != null) f.docId = String(fix.docId).slice(0, 20);
+    await F.updateDoc(F.doc(db, 'orders', o.id), f);
+    await B.notifyClient(o.uid, 'Tu contrato está listo', 'Ya puedes ver y guardar tu contrato ' + window.PB_CONFIG.contractNo(o) + ' en la sección Contratos de tu panel.');
+  };
   B.reportPaid = function (id) {
     return F.updateDoc(F.doc(db, 'orders', id), { status: 'pago_reportado', reportedAt: Date.now() });
   };

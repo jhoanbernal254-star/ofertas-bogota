@@ -9,7 +9,7 @@
   Los valores de aquí son los iniciales; lo que guardes desde el panel de administración tiene prioridad.
 */
 window.PB_CONFIG = {
-  version: '2026.11.22-d',
+  version: '2026.11.25-c',
   mode: 'firebase', // 'demo' | 'firebase'
   brand: 'Ofertas Bogotá', // nombre provisional, cámbialo cuando lo definas
   functionsRegion: 'us-central1',
@@ -184,11 +184,18 @@ window.PB_CONFIG.resolve = function (raw) {
     prices[t] = pos(c.prices && c.prices[t], C.tiers[t].price);
     if (C.tiers[t].cap) caps[t] = pos(c.caps && c.caps[t], C.tiers[t].cap);
   });
+  var notes = (Array.isArray(c.notes) ? c.notes : []).slice(0, 3).map(function (n) {
+    n = n || {};
+    var link = String(n.link || '').trim().slice(0, 200);
+    if (!/^(https:\/\/|#)/.test(link)) link = '';
+    return { enabled: n.enabled === true, title: String(n.title || '').slice(0, 60), text: String(n.text || '').slice(0, 140), link: link, until: /^\d{4}-\d{2}-\d{2}$/.test(n.until || '') ? n.until : '' };
+  });
   var pr = c.promo || {}, ln = c.launch || {};
   var lim = Number(pr.limit);
   return {
     prices: prices,
     caps: caps,
+    notes: notes,
     designPrice: pos(c.designPrice, C.design.pricePerPiece),
     launch: {
       enabled: typeof ln.enabled === 'boolean' ? ln.enabled : C.launch.enabled,
