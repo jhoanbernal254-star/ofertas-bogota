@@ -714,6 +714,12 @@
             <h3 class="adm-h3">Mensajes para los clientes (pie de Mi panel)</h3>
             <p class="fine">Salen en una franja al final del panel de cada cliente. El de "Publicidad gratis" sale solo mientras el lanzamiento esté activo. Aquí puedes agregar hasta 3 más; si hay varios, rotan.</p>
             <div id="noteBox"></div>
+            <h3 class="adm-h3">Pie de página, redes y correos</h3>
+            <p class="fine">Todo lo que sale en el pie de la página pública. Deja un campo vacío para ocultarlo (por ejemplo una red social que aún no tienes). Los enlaces deben empezar por https://</p>
+            <div id="footBox"></div>
+            <h3 class="adm-h3">Documentos legales: datos pendientes</h3>
+            <p class="fine">Los textos de Quiénes somos, Términos, Privacidad, Tratamiento de datos, Cookies y PQRS ya están publicados. Aquí completas los datos que faltan y se actualizan solos en todos los documentos. Mientras estén vacíos se ve "[por completar]".</p>
+            <div id="legalBox"></div>
             <div class="acts"><button class="btn sm yellow" type="button" id="saveCfg">Guardar</button></div>
           </div>
           </section>
@@ -726,26 +732,9 @@
 <footer class="foot" id="foot">
   <div class="hazard" aria-hidden="true"></div>
   <div class="in">
-    <div class="fgrid">
-      <div class="fabout">
-        <a class="logo" href="#inicio" aria-label="Ofertas Bogotá, ir al inicio">
-          <span class="logo-ic"><span class="ic" data-ic="tag"></span></span>
-          <span class="logo-tx"><b>Ofertas<i>.</i></b><small>BOGOTÁ</small></span>
-        </a>
-        <p>El directorio comercial y la vitrina de ofertas de Bogotá y sus municipios cercanos. Conectamos negocios locales con las personas que los buscan.</p>
-      </div>
-      <div><h4>Categorías</h4><ul id="fCats"></ul></div>
-      <div><h4>Localidades</h4><ul id="fLocs"></ul></div>
-      <div>
-        <h4>Comerciantes</h4>
-        <ul>
-          <li><a href="#anunciar">Publicar un anuncio</a></li>
-          <li><a href="#planes">Diseño y páginas web</a></li>
-          <li><a href="#planes">Planes y precios</a></li>
-          <li><a href="#cuenta" id="navCuenta">Mi panel</a></li>
-        </ul>
-      </div>
-    </div>
+    <div class="fgrid" id="fGrid"></div>
+    <div class="fbadges" id="fBadges"></div>
+    <div class="fmails" id="fMails"></div>
     <div class="demo" id="demoBanner" hidden>
       <strong>Modo demostración</strong>
       <p>Todo es de prueba y vive solo en este navegador (en otro celular o computador no se ve lo mismo). No se cobra dinero. Entra con las cuentas de prueba para ver el lado del comerciante y el del administrador.</p>
@@ -756,7 +745,8 @@
     </div>
     <div class="fbar">
       <p id="footText"></p>
-      <p class="legal-links"><a href="#terminos">Términos y condiciones</a><span aria-hidden="true"> · </span><a href="#privacidad">Política de privacidad</a><span id="adminSep" hidden aria-hidden="true"> · </span><a href="#admin" id="navAdmin" hidden>Administrar</a></p>
+      <p class="legal-links" id="legalLinks"></p>
+      <p class="made" id="fMade"></p>
     </div>
   </div>
 </footer>
@@ -822,10 +812,11 @@
 
 <script src="config.js"></script>
 <script src="backend-firebase.js"></script>
-<script src="legal.js"></script>
+<script src="legal-docs.js"></script>
 <script src="ui.js"></script>
 <script src="extras.js"></script>
 <script src="services.js"></script>
+<script src="footer.js"></script>
 <script src="pages.js"></script>
 <script src="popup.js"></script>
 <script src="main.js"></script>

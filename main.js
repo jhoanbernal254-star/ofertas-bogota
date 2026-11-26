@@ -29,16 +29,16 @@
     if (raw.indexOf('anuncio-') === 0 && raw.length > 8) return { view: 'ficha', id: raw.slice(8) };
     if (raw.indexOf('informe-') === 0 && raw.length > 8) return { view: 'informe', id: raw.slice(8) };
     if (raw.indexOf('contrato-') === 0 && raw.length > 9) return { view: 'contrato', id: raw.slice(9) };
-    if (raw === 'terminos' || raw === 'privacidad') return { view: 'legal', id: raw };
+    if (PB.LEGAL_IDS.indexOf(raw) >= 0) return { view: 'legal', id: raw };
     return { view: VIEWS.indexOf(raw) >= 0 ? raw : DEFAULT_VIEW[ENTRY], q: new URLSearchParams(q) };
   }
 
   function renderChrome() {
+    PB.renderFooter();
     var logged = !!state.user, admin = PB.isAdmin();
     $('loginLink').hidden = logged;
     $('logoutBtn').hidden = !logged;
     $('navCuenta').hidden = !logged;
-    $('navAdmin').hidden = true; $('adminSep').hidden = true;
     var demo = B.mode === 'demo';
     $('demoBar').hidden = !demo; $('demoBanner').hidden = !demo; $('demoLogins').hidden = !demo;
     $('footText').textContent = C.brand + ' · ' + (demo ? 'Demostración, sin cobros reales' : 'Bogotá y la Sabana') + ' · v' + (C.version || '?');
@@ -56,32 +56,7 @@
   }
   async function doLogout() { try { await B.signOut(); } catch (e) {} location.hash = '#inicio'; }
 
-  function renderFooter() {
-    var fc = $('fCats'); fc.textContent = '';
-    C.categorias.slice(0, 6).forEach(function (name) {
-      var li = el('li'), a = el('a', '', name); a.href = '#directorio';
-      a.addEventListener('click', function () { PB.setFilters({ cat: name }); });
-      li.appendChild(a); fc.appendChild(li);
-    });
-    var fl = $('fLocs'); fl.textContent = '';
-    C.localidadesTop.slice(0, 6).forEach(function (name) {
-      var li = el('li'), a = el('a', '', name); a.href = '#directorio';
-      a.addEventListener('click', function () { PB.setFilters({ loc: name }); });
-      li.appendChild(a); fl.appendChild(li);
-    });
-  }
-
-  function renderLegal(id) {
-    var doc = window.PB_LEGAL && window.PB_LEGAL[id], box = $('legalBody');
-    box.textContent = '';
-    if (!doc) return;
-    box.appendChild(el('h2', '', doc.title));
-    box.appendChild(el('p', 'fine', 'Última actualización: ' + C.legal.updated + '. Borrador pendiente de revisión legal.'));
-    doc.sections(C.legal).forEach(function (sec) {
-      box.appendChild(el('h3', '', sec.t));
-      sec.p.forEach(function (t) { box.appendChild(el('p', '', t)); });
-    });
-  }
+  function renderLegal(id) { PB.renderLegalDoc(id, $('legalBody')); }
 
   function route() {
     var p = parseHash(), v = p.view;
@@ -159,7 +134,6 @@
   async function init() {
     PB.hydrate(document);
     ['initPages', 'initPopup', 'initExtras', 'initPublish', 'initAccount', 'initContract', 'initReports', 'initAdmin'].forEach(function (f) { try { if (PB[f]) PB[f](); } catch (e) { console.error('[PB] ' + f, e); } });
-    renderFooter();
     document.title = C.brand;
     $('logoutBtn').addEventListener('click', doLogout);
     $('burger').addEventListener('click', function () {

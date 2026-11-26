@@ -466,6 +466,46 @@
       });
       nb.appendChild(g);
     }
+    fillFooterCfg();
+  }
+
+  function fInput(parent, id, label, val, max, area) {
+    var w = el('div', 'fld'), lb = el('label', '', label), inp = document.createElement(area ? 'textarea' : 'input');
+    if (area) inp.rows = 4; else inp.type = 'text';
+    inp.id = id; inp.value = val || ''; if (max) inp.maxLength = max; lb.htmlFor = id; w.appendChild(lb); w.appendChild(inp); parent.appendChild(w); return inp;
+  }
+  function fillFooterCfg() {
+    var c = PB.cfg(), f = c.footer, box = $('footBox'); box.textContent = '';
+    function card(t) { var g = el('div', 'card notebox'); g.appendChild(el('h3', '', t)); box.appendChild(g); return g; }
+    var g = card('Frases bajo el logo');
+    fInput(g, 'f-tag', 'Frase principal', f.tagline, 160); fInput(g, 'f-tag2', 'Frase destacada (sale resaltada)', f.tagline2, 160);
+    g = card('Redes sociales (enlace completo)');
+    PB.FOOT_SOCIAL.forEach(function (s) { fInput(g, 'f-s-' + s[0], s[1], f.social[s[0]], 300); });
+    g = card('Correos corporativos');
+    PB.FOOT_MAILS.forEach(function (m) { fInput(g, 'f-m-' + m[0], m[1], f.emails[m[0]], 80); });
+    g = card('Invitación a comerciantes');
+    fInput(g, 'f-c-t', 'Título', f.cta.title, 60); fInput(g, 'f-c-x', 'Texto', f.cta.text, 140); fInput(g, 'f-c-b', 'Texto del botón', f.cta.button, 40);
+    g = card('Las 4 insignias');
+    f.badges.forEach(function (b, i) { fInput(g, 'f-b-t' + i, 'Insignia ' + (i + 1) + ': título', b.title, 40); fInput(g, 'f-b-x' + i, 'Insignia ' + (i + 1) + ': texto', b.text, 70); });
+    g = card('Documentos de interés (barra inferior)');
+    g.appendChild(el('p', 'fine', 'En "Enlace" puedes dejar el que viene (#terminos, etc.) o pegar un https:// si prefieres otro documento. Sin nombre no se muestra.'));
+    f.docs.forEach(function (d, i) { fInput(g, 'f-d-l' + i, 'Documento ' + (i + 1) + ': nombre', d.label, 50); fInput(g, 'f-d-u' + i, 'Documento ' + (i + 1) + ': enlace', d.url, 300); });
+    var lb = $('legalBox'); lb.textContent = '';
+    var g2 = el('div', 'card notebox'); lb.appendChild(g2);
+    ((window.PB_LEGAL_DOCS || {}).fields || []).forEach(function (x) {
+      fInput(g2, 'l-' + x.k, x.label + (x.opt ? '' : ''), c.legalVals[x.k] || '', x.k === 'inventario_cookies' ? 3000 : 400, x.k === 'inventario_cookies' || x.k === 'nota_radicacion' || x.k === 'nota_inventario' || x.k === 'nota_compromiso');
+      $('l-' + x.k).placeholder = PB.legalValue(x.k) || (x.opt ? 'Opcional' : 'Pendiente');
+    });
+  }
+  function readFooterCfg() {
+    var v = function (id) { return $(id).value.trim(); }, social = {}, emails = {}, legalVals = {}, bad = '';
+    PB.FOOT_SOCIAL.forEach(function (s) { var u = v('f-s-' + s[0]); if (u && !/^https:\/\//.test(u)) bad = 'El enlace de ' + s[1] + ' debe empezar por https://'; social[s[0]] = u; });
+    PB.FOOT_MAILS.forEach(function (m) { var u = v('f-m-' + m[0]); if (u && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(u)) bad = 'El correo de ' + m[1] + ' no parece válido.'; emails[m[0]] = u; });
+    var docs = [];
+    for (var i = 0; i < 6; i++) { var u = v('f-d-u' + i); if (u && !/^(https:\/\/|#)/.test(u)) bad = 'El enlace del documento ' + (i + 1) + ' debe empezar por https:// o #'; docs.push({ label: v('f-d-l' + i), url: u }); }
+    var badges = []; for (var j = 0; j < 4; j++) badges.push({ title: v('f-b-t' + j), text: v('f-b-x' + j) });
+    ((window.PB_LEGAL_DOCS || {}).fields || []).forEach(function (x) { legalVals[x.k] = v('l-' + x.k); });
+    return { bad: bad, footer: { tagline: v('f-tag'), tagline2: v('f-tag2'), social: social, emails: emails, cta: { title: v('f-c-t'), text: v('f-c-x'), button: v('f-c-b') }, badges: badges, docs: docs }, legalVals: legalVals };
   }
 
   // ---------- Editor ----------
@@ -514,8 +554,9 @@
         if (lk && !/^https:\/\//.test(lk)) { PB.setMsg($('admMsg'), 'El enlace del mensaje ' + (i + 1) + ' debe empezar por https://', 'err'); return; }
         notes.push({ enabled: $('n-on' + i).checked, title: $('n-t' + i).value.trim(), text: $('n-x' + i).value.trim(), link: lk, until: $('n-u' + i).value || '' });
       }
+      var fc = readFooterCfg(); if (fc.bad) { PB.setMsg($('admMsg'), fc.bad, 'err'); return; }
       adminDo(function () {
-        return B.saveConfig({ prices: prices, designPrice: design, caps: { premium: capp, destacado: capd }, launch: { enabled: $('a-lenabled').checked, until: $('a-luntil').value || '' }, notes: notes });
+        return B.saveConfig({ footer: fc.footer, legalVals: fc.legalVals, prices: prices, designPrice: design, caps: { premium: capp, destacado: capd }, launch: { enabled: $('a-lenabled').checked, until: $('a-luntil').value || '' }, notes: notes });
       }, 'Guardado. Los visitantes ya ven los valores nuevos.');
     });
     $('db-q').addEventListener('input', renderDb);

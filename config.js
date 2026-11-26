@@ -9,7 +9,7 @@
   Los valores de aquí son los iniciales; lo que guardes desde el panel de administración tiene prioridad.
 */
 window.PB_CONFIG = {
-  version: '2026.11.25-c',
+  version: '2026.11.25-d',
   mode: 'firebase', // 'demo' | 'firebase'
   brand: 'Ofertas Bogotá', // nombre provisional, cámbialo cuando lo definas
   functionsRegion: 'us-central1',
@@ -66,6 +66,15 @@ window.PB_CONFIG = {
   launch: { enabled: true, until: '2027-01-31' },
 
   // Datos de contacto públicos y servicios que se muestran en "Planes y servicios".
+  footerDefaults: {
+    tagline: 'El directorio comercial y la vitrina de ofertas de Bogotá y la Sabana.',
+    tagline2: 'Conectamos negocios locales con las personas que los buscan.',
+    social: { whatsapp: 'https://wa.me/573107987275', instagram: 'https://www.instagram.com/ofertasbogo', facebook: '', tiktok: '', youtube: '' },
+    emails: { administracion: 'administracion@ofertasbogota.lat', comercial: 'comercial@ofertasbogota.lat', facturacion: 'facturacion@ofertasbogota.lat', soporte: 'soporte@ofertasbogota.lat', pqrs: 'pqr@ofertasbogota.lat' },
+    cta: { title: '¿Tienes un negocio?', text: 'Dale más visibilidad, publica tus ofertas y llega a más clientes.', button: 'Publica tu anuncio' },
+    badges: [{ title: 'Negocios locales', text: 'Comercios de tu zona' }, { title: 'Ofertas reales', text: 'Promociones publicadas por sus dueños' }, { title: 'Bogotá y la Sabana', text: 'Cobertura local' }, { title: 'Apoyo al comercio local', text: 'Impulsamos a los emprendedores' }],
+    docs: [{ label: 'Quiénes somos', url: '#quienes' }, { label: 'Términos y condiciones', url: '#terminos' }, { label: 'Política de privacidad', url: '#privacidad' }, { label: 'Tratamiento de datos', url: '#datos' }, { label: 'Política de cookies', url: '#cookies' }, { label: 'PQRS', url: '#pqrs' }]
+  },
   site: { url: 'https://ofertasbogota.lat', instagram: 'ofertasbogo', cobertura: 'Bogotá y municipios participantes de la Sabana: Chía, Soacha, Mosquera, Funza, Cota y Zipaquirá.' },
   services: {
     design: [
@@ -190,12 +199,24 @@ window.PB_CONFIG.resolve = function (raw) {
     if (!/^(https:\/\/|#)/.test(link)) link = '';
     return { enabled: n.enabled === true, title: String(n.title || '').slice(0, 60), text: String(n.text || '').slice(0, 140), link: link, until: /^\d{4}-\d{2}-\d{2}$/.test(n.until || '') ? n.until : '' };
   });
+  var FD = C.footerDefaults, f = c.footer || {};
+  function txt(v, d, n) { return typeof v === 'string' ? v.trim().slice(0, n) : d; }
+  function url(v, d) { v = typeof v === 'string' ? v.trim().slice(0, 300) : d; return v === '' || /^(https:\/\/|#|mailto:)/.test(v) ? v : d; }
+  var social = {}; Object.keys(FD.social).forEach(function (k) { social[k] = url((f.social || {})[k], FD.social[k]); });
+  var emails = {}; Object.keys(FD.emails).forEach(function (k) { var v = txt((f.emails || {})[k], FD.emails[k], 80); emails[k] = v === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? v : FD.emails[k]; });
+  var fcta = f.cta || {};
+  var badges = FD.badges.map(function (b, i) { var x = (f.badges || [])[i] || {}; return { title: txt(x.title, b.title, 40), text: txt(x.text, b.text, 70) }; });
+  var docs = FD.docs.map(function (d, i) { var x = (f.docs || [])[i] || {}; return { label: txt(x.label, d.label, 50), url: url(x.url, d.url) }; });
+  var lv = {}; Object.keys(c.legalVals || {}).slice(0, 40).forEach(function (k) { if (/^[a-z0-9_]{1,40}$/.test(k)) lv[k] = String(c.legalVals[k] || '').trim().slice(0, k === 'inventario_cookies' ? 3000 : 400); });
   var pr = c.promo || {}, ln = c.launch || {};
   var lim = Number(pr.limit);
   return {
     prices: prices,
     caps: caps,
     notes: notes,
+    footer: { tagline: txt(f.tagline, FD.tagline, 160), tagline2: txt(f.tagline2, FD.tagline2, 160), social: social, emails: emails,
+      cta: { title: txt(fcta.title, FD.cta.title, 60), text: txt(fcta.text, FD.cta.text, 140), button: txt(fcta.button, FD.cta.button, 40) }, badges: badges, docs: docs },
+    legalVals: lv,
     designPrice: pos(c.designPrice, C.design.pricePerPiece),
     launch: {
       enabled: typeof ln.enabled === 'boolean' ? ln.enabled : C.launch.enabled,
