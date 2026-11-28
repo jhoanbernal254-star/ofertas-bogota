@@ -134,6 +134,7 @@
   async function init() {
     PB.hydrate(document);
     ['initPages', 'initPopup', 'initExtras', 'initPublish', 'initAccount', 'initContract', 'initReports', 'initAdmin'].forEach(function (f) { try { if (PB[f]) PB[f](); } catch (e) { console.error('[PB] ' + f, e); } });
+    if (PB.initHeroSky) PB.initHeroSky();
     document.title = C.brand;
     $('logoutBtn').addEventListener('click', doLogout);
     $('burger').addEventListener('click', function () {

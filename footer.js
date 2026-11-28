@@ -127,4 +127,34 @@
     box.appendChild(nav);
   };
   PB.LEGAL_IDS = ['quienes', 'terminos', 'privacidad', 'datos', 'cookies', 'pqrs', 'colombia'];
+
+  /* ---------- Fondo animado del inicio: ciudad de noche en movimiento ---------- */
+  PB.initHeroSky = function () {
+    var box = document.getElementById('heroSky'); if (!box) return;
+    var seed = 7; function rnd() { seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
+    function layer(cls, W, H, minW, maxW, minH, maxH, wins) {
+      var parts = ['<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" width="' + W + '" height="' + H + '">'], x = 0;
+      while (x < W) {
+        var bw = Math.round(minW + rnd() * (maxW - minW)), bh = Math.round(minH + rnd() * (maxH - minH)), y = H - bh;
+        parts.push('<rect class="bd" x="' + x + '" y="' + y + '" width="' + (bw - 2) + '" height="' + bh + '"/>');
+        if (rnd() > 0.7) parts.push('<rect class="bd" x="' + (x + bw / 2 - 1) + '" y="' + (y - 22) + '" width="2" height="22"/>');
+        if (wins) for (var wy = y + 10; wy < H - 8; wy += 12) for (var wx = x + 6; wx < x + bw - 10; wx += 10) if (rnd() > 0.72) {
+          parts.push('<rect class="wn" style="animation-delay:' + (rnd() * 8).toFixed(1) + 's;animation-duration:' + (3 + rnd() * 6).toFixed(1) + 's" x="' + wx + '" y="' + wy + '" width="4" height="5"/>');
+        }
+        x += bw;
+      }
+      parts.push('</svg>');
+      var d = document.createElement('div'); d.className = 'sky-l ' + cls;
+      d.innerHTML = parts.join('') + parts.join(''); return d;
+    }
+    var stars = document.createElement('div'); stars.className = 'sky-stars';
+    for (var i = 0; i < 46; i++) { var s = document.createElement('i'); s.style.cssText = 'left:' + (rnd() * 100).toFixed(1) + '%;top:' + (rnd() * 55).toFixed(1) + '%;animation-delay:' + (rnd() * 6).toFixed(1) + 's;animation-duration:' + (2 + rnd() * 4).toFixed(1) + 's'; stars.appendChild(s); }
+    var glow = document.createElement('div'); glow.className = 'sky-glow';
+    var city = document.createElement('div'); city.className = 'sky-photo';
+    var cloud = document.createElement('div'); cloud.className = 'sky-cloud';
+    box.appendChild(glow); box.appendChild(stars); box.appendChild(city); box.appendChild(cloud);
+    box.appendChild(layer('far', 1400, 260, 26, 60, 60, 170, false));
+    box.appendChild(layer('mid', 1400, 260, 34, 80, 80, 220, true));
+    var car = document.createElement('div'); car.className = 'sky-road'; car.innerHTML = '<i></i><i></i><i></i>'; box.appendChild(car);
+  };
 })();

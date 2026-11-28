@@ -99,7 +99,11 @@ service cloud.firestore {
             && request.resource.data.status == 'pago_reportado'
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'reportedAt']))
         || (signedIn() && resource.data.uid == request.auth.uid
-            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['clientArchived']));
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['clientArchived']))
+        || (signedIn() && resource.data.uid == request.auth.uid
+            && resource.data.get('contractStatus', '') == ''
+            && request.resource.data.contractStatus == 'solicitado'
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['contractStatus', 'contractRequestedAt']));
       allow delete: if false;
     }
   }

@@ -136,13 +136,8 @@ h1, h2, h3, h4 { font-family: var(--font-h); margin: 0; letter-spacing: -0.02em;
   position: relative; color: #fff; padding: clamp(40px, 7vw, 84px) 0 clamp(36px, 6vw, 64px);
   background-color: var(--navy);
   background-image:
-    linear-gradient(180deg, rgba(8, 14, 42, 0.78), rgba(8, 14, 42, 0.92)),
-    url("hero.jpg"),
-    radial-gradient(900px 420px at 80% 0%, rgba(255, 210, 31, 0.16), transparent 60%),
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 44px),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 44px);
-  background-size: auto, cover, auto, auto, auto;
-  background-position: center;
+    linear-gradient(180deg, #060B26 0%, #0B1640 70%, #14235A 100%);
+  overflow: hidden; isolation: isolate;
 }
 .hero-badge { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 22px; padding: 7px 14px; border-radius: 999px; border: 1px solid rgba(255, 210, 31, 0.45); background: rgba(255, 210, 31, 0.1); color: var(--yellow); font-size: 12.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
 .hero h1 { font-size: clamp(38px, 7.2vw, 80px); font-weight: 800; letter-spacing: -0.04em; line-height: 0.98; max-width: 14em; }
@@ -886,3 +881,31 @@ body:has(#v-cuenta:not([hidden]) #cliBody) header.top, body:has(#v-cuenta:not([h
 @media (max-width: 1100px) { .fgrid { grid-template-columns: 1fr 1fr 1fr; } .fabout { grid-column: 1 / -1; } .fcta { grid-column: span 2; } .fbadges { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 640px) { .fgrid { grid-template-columns: 1fr 1fr; } .fcta { grid-column: 1 / -1; } .fbadges { grid-template-columns: 1fr; } }
 @media (max-width: 420px) { .fgrid { grid-template-columns: 1fr; } }
+
+/* ===== Inicio: ciudad en movimiento ===== */
+.hero > .in { position: relative; z-index: 2; }
+.hero-sky { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.hero-sky::after { content: ""; position: absolute; inset: 0; z-index: 5; background: linear-gradient(90deg, rgba(6,11,38,.82) 0%, rgba(6,11,38,.55) 55%, rgba(6,11,38,.15) 100%); }
+.sky-glow { position: absolute; left: -10%; right: -10%; bottom: 0; height: 70%; background: radial-gradient(60% 80% at 70% 100%, rgba(255,210,31,.20), transparent 70%), radial-gradient(50% 60% at 20% 100%, rgba(80,120,255,.18), transparent 70%); animation: skyPulse 9s ease-in-out infinite alternate; }
+.sky-stars i { position: absolute; width: 2px; height: 2px; border-radius: 50%; background: #fff; opacity: .2; animation: twinkle 3s ease-in-out infinite; }
+.sky-photo { position: absolute; left: 0; bottom: 0; width: 200%; height: 62%; background: url(adm-fondo.jpg) 0 100% / 50% 100% repeat-x; opacity: .35; animation: skyPan 140s linear infinite; }
+.sky-cloud { position: absolute; left: 0; top: 12%; width: 200%; height: 90px; background: radial-gradient(90px 24px at 10% 50%, rgba(255,255,255,.07), transparent), radial-gradient(130px 28px at 35% 30%, rgba(255,255,255,.06), transparent), radial-gradient(110px 22px at 60% 60%, rgba(255,255,255,.07), transparent), radial-gradient(140px 26px at 85% 40%, rgba(255,255,255,.06), transparent); animation: skyPan 90s linear infinite; }
+.sky-l { position: absolute; left: 0; bottom: 0; display: flex; width: max-content; will-change: transform; }
+.sky-l svg { display: block; height: clamp(120px, 24vw, 260px); width: auto; min-width: 1400px; }
+.sky-l.far { opacity: .75; animation: skyShift 120s linear infinite; }
+.sky-l.far .bd { fill: #0E1A4A; }
+.sky-l.mid { animation: skyShift 70s linear infinite; }
+.sky-l.mid .bd { fill: #070D2B; }
+.sky-l .wn { fill: #FFD21F; opacity: .15; animation: winOn 5s ease-in-out infinite; }
+.sky-road { position: absolute; left: 0; right: 0; bottom: 6px; height: 4px; z-index: 3; overflow: hidden; }
+.sky-road i { position: absolute; top: 0; width: 46px; height: 3px; border-radius: 3px; background: linear-gradient(90deg, transparent, #FFD21F); box-shadow: 0 0 10px #FFD21F; animation: carGo 9s linear infinite; left: -60px; }
+.sky-road i:nth-child(2) { animation-duration: 13s; animation-delay: -4s; background: linear-gradient(90deg, transparent, #FF5A5F); box-shadow: 0 0 10px #FF5A5F; }
+.sky-road i:nth-child(3) { animation-duration: 11s; animation-delay: -8s; }
+@keyframes skyShift { to { transform: translateX(-50%); } }
+@keyframes skyPan { to { transform: translateX(-50%); } }
+@keyframes twinkle { 50% { opacity: 1; } }
+@keyframes winOn { 0%, 100% { opacity: .1; } 45%, 60% { opacity: .95; } }
+@keyframes skyPulse { to { opacity: .55; } }
+@keyframes carGo { to { transform: translateX(calc(100vw + 120px)); } }
+@media (max-width: 700px) { .hero-sky::after { background: linear-gradient(180deg, rgba(6,11,38,.7), rgba(6,11,38,.55)); } }
+@media (prefers-reduced-motion: reduce) { .hero-sky * { animation: none !important; } .sky-l .wn { opacity: .6; } }
